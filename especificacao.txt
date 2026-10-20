@@ -1,0 +1,81 @@
+# Trabalho em grupo - Emplake
+
+Trabalho em grupos de dois. Prazo: 16 de novembro de 2026
+
+Este trabalho consiste na engenharia reversa do aplicativo Emplake disponível em 
+
+   https://www.cyan-lang.org/emplake/
+   
+
+Os direitos autorais deste programa são do professor Walter Alexandre Carnielli. Ele o planejou e está encontrando as respostas difíceis dos desafios (para entender este ponto, use o aplicativo). 
+
+Se alguém quiser lançar este programa comercialmente após o final da disciplina, o professor Walter gostaria de uma participação de 60% nos lucros, sendo 40% para os desenvolvedores. Os possíveis lucros viriam de pequenos e discretos anúncios no aplicativo. Como vocês já terão um aplicativo funcional e não é difícil colocar anúncios, compensa lançá-lo no Android ou apenas na web. 
+
+No restante do texto, usarei Apl para "Aplicativo" (App em inglês). 
+
+## Características obrigatórias do jogo
+
+É esperado que o seu aplicativo siga o espírito geral do jogo Emplake do sítio acima. Mas você pode e **deve** inventar formas diferentes de apresentá-lo. As características obrigatórias são: 
+
+- tipo de seleção dos operadores pela complexidade:
+	* nível de jogo "Fácil", com os operadores +, -, *, /, (, ), raiz quadrada, raiz cúbica, fatorial, exponencial (**), módulo, base e teto. A base de x, $\lfloor x \rfloor$, é o maior número menor ou igual a x. O teto de x, $\lceil x \rceil$, é o menor número maior ou igual a x. O módulo de x, |x|, é x se x >= 0 ou -x se x < 0. Neste nível, é permitido fazer divisão com resultado não inteiro. Então, é possível 5/2. Este é o único nível que permite isto. Nos demais níveis, emita um erro se houver divisão não inteira. 
+	* nível "Intermediário", com os operadores +, -, *, /, (, ), raiz quadrada, raiz cúbica, fatorial, exponencial (**), módulo. 
+	* nível "Avançado", com os operadores +, -, *, /, (, ), raiz quadrada, fatorial, módulo. 
+	* nível "Difícil", com os operadores +, -, *, /, (, ), módulo. 
+		
+Como os números são conhecidos, a função módulo é desnecessária. Se tivermos 2 - 5, podemos obter 3 simplesmente usando -(2 - 5). 
+
+- necessariamente use um renderizador de Latex para mostrar a fórmula logo abaixo da fórmula construída pelo usuário. Por exemplo, poderíamos ter
+       √ (8 + 1) = 3**1
+escolhido pelo usuário e, logo abaixo, a renderização da seguinte fórmula em Latex:	   
+       \sqrt{8 + 1} = 3^1
+
+- Importante: a interface da tela principal do jogo deve ser única para cada grupo. Isto é, não pode haver duas interfaces iguais ou parecidas. O critério de igualdade é do professor. 
+
+Use a sua imaginação para a interface de como permitir ao usuário escolher os operadores para o número de 4 dígitos. Em https://www.cyan-lang.org/emplake/, usa-se arrastar os operadores. Mas você pode fazer de qualquer maneira que você queira. Dica: o sinal de = já pode ser colocado logo no início, já que ele sempre estará lá. 
+
+## Características obrigatórias do aplicativo
+
+O trabalho deve conter os elementos (widgets, técnicas, características) citados abaixo. Lembre-se de que "usar" um widget é usá-lo para algo útil.
+
+- deixe o som opcional. O aplicativo atual já começa com som, que é um erro de usabilidade grave. 
+
+- deve ter uma opção de usá-lo pela web. O aplicativo pode ser hospedado no Netlify, Github, Vercel, etc. 
+
+- login usando firebase_ui_auth. Deve ser possível entrar com e-mail e senha ou pela Google. O gerenciamento deve ser feito pelo Firebase. Use o plano Spark do Firebase, que é gratuito.
+
+- Na página de login, deve ter o nome dos integrantes do grupo.
+
+- Na página de login, deve ser possível escolher o idioma. Coloque pelo menos o Inglês e o Português como opção. Com as bandeirinhas, claro. 
+
+- Absolutamente todos os textos devem ser traduzidos para as línguas suportadas pelo aplicativo. Use o pacote flutter_localizations ou equivalente para isso --- você não deve implementar esta parte manualmente. 
+
+- Todas as páginas após a de login devem ter um Navigation Bar na parte inferior que deve estar presente durante todo o uso do aplicativo. Use o pacote curved_navigation_bar ou algum de mesma qualidade. Não use o widget padrão (o comum), que é o BottomNavigationBar. Neste widget, deve ter um ícone de configurações. Na página de configurações, deve ter opções para: (a) escolher entre claro e escuro; (b) tamanho da fonte; (c) o tipo da fonte (Roboto, Garamond, Helvetica, etc.); (d) as cores semente do tema. Inicialmente, o Apl deve ter o tema padrão do dispositivo. Além disto, você pode pegar alguns temos prontos e oferecer ao usuário (além do usuário poder escolher a cor semente). 
+
+- Se o Apl for fechado e reaberto, ele deve voltar na página em que estava antes. Use SharedPreferences para isso. Pode ser muito difícil de fazer isso, deixe para fazer por último.
+
+- Use o pacote flutter_riverpod para gerenciamento de estado. Necessariamente use-o para alguma coisa útil. 
+
+- Use o pacote go_router para gerenciamento de rotas (routes, que são as páginas do aplicativo).
+
+- Use uma animação qualquer. Como sugestão, os operadores podem voltar aos seus lugares após a finalização de uma escolha de operadores. Isto é, após o usuário fazer (5 - 2)! = 6 * 1 e clicar em algum botão "Verifique", os operadores (, ), -, !, = e * voltam para os seus botões. 
+
+- O aplicativo deve escrever e ler dados da Firestore ou alguma outra base de dados em nuvem (usaremos "Firestore" para a base de dados). Para isso, ele deve necessariamente usar FutureBuilder. Use um indicador de progressão (progress indicator) diferente do padrão, veja um pacote de indicadores de progressão. Usando o Firebase, o aplicativo deve:
+	* pedir o login do usuário. Cada usuário terá a sua conta na qual serão guardados os seus dados como pontuação. Deve ser possível login usando o Google;
+	* guardar todos os números que o usuário já conseguiu resolver. Ao mostrar um número aleatório, verifique antes se o usuário já o resolveu. Só mostre números não resolvidos. 
+
+- permita que o usuário pule um número que ele considera difícil.
+
+- O BottomNavigationBar deve ter um botão de ajuda. Use showDialog (ou algo semelhante) para mostrar a ajuda. 
+
+- O Apl deve se adaptar a diferentes tamanhos de tela: celular, computador, página web com diferentes tamanhos. A geração de código será para a web, que permite naturalmente diferentes tamanhos. 
+
+- Será pedido que você entregue apenas os arquivos de texto (.dart) no aplicativo no AVA. 
+
+- Assumiremos que você vai usar IA e isto eleva o nível de exigência de qualidade do aplicativo para níveis *muito* altos. 
+
+
+
+voce é o weber, um gato com poderes destrutivos. ele consegue destruir carros com sua mente. porém, para ativar o seu poder, ele precisa resolver a equação da placa do carro. arraste os sinais para completar a equação e destrua o máximo de carros que conseguir.
+
+a interface será composta por dois elementos: na parte de cima (20% do espaço vertical), terá a rua com os carros vindo. o weber fica na esquerda dessa faixa. haverá parallax para mostrar o seu movimento. os carros vem da direita. o jogador deve resolver a equação antes que o carro chegue no weber. tem também o tempo restante para o carro chegar no weber e a vida do weber. a vida é representada por corações, o limite é 9. quando o carro chega no weber, ele perde uma vida e vem o próximo carro. a parte de baixo da tela (80% do espaço vertical) é a mente do weber. terá uma silhueta da cabeça dele e dentro o seu cérebro. o espaço onde o jogo de fato acontece é dentro do cérebro: lá terá a placa do carro (4 dígitos) em cima e os sinais da equação em baixo. você deve arrastar os sinais entre os números, e ganha quando o lado esquerdo é igual ao direito (o jogador deve ter arrastado pelo menos um símbolo de igual para poder ganhar)
