@@ -79,3 +79,29 @@ O trabalho deve conter os elementos (widgets, técnicas, características) citad
 voce é o weber, um gato com poderes destrutivos. ele consegue destruir carros com sua mente. porém, para ativar o seu poder, ele precisa resolver a equação da placa do carro. arraste os sinais para completar a equação e destrua o máximo de carros que conseguir.
 
 a interface será composta por dois elementos: na parte de cima (20% do espaço vertical), terá a rua com os carros vindo. o weber fica na esquerda dessa faixa. haverá parallax para mostrar o seu movimento. os carros vem da direita. o jogador deve resolver a equação antes que o carro chegue no weber. tem também o tempo restante para o carro chegar no weber e a vida do weber. a vida é representada por corações, o limite é 9. quando o carro chega no weber, ele perde uma vida e vem o próximo carro. a parte de baixo da tela (80% do espaço vertical) é a mente do weber. terá uma silhueta da cabeça dele e dentro o seu cérebro. o espaço onde o jogo de fato acontece é dentro do cérebro: lá terá a placa do carro (4 dígitos) em cima e os sinais da equação em baixo. você deve arrastar os sinais entre os números, e ganha quando o lado esquerdo é igual ao direito (o jogador deve ter arrastado pelo menos um símbolo de igual para poder ganhar)
+
+## Especificações Técnicas e Parâmetros Definidos
+
+- Equação e Dígitos:
+  * Os 4 dígitos da placa são fixos: não podem ser reordenados nem concatenados.
+  * O jogador só pode arrastar e soltar operadores.
+  * Operadores são inseridos em slots antes ou depois dos números.
+  * Entre os dígitos (ex: entre A e B), múltiplos operadores podem ser inseridos (exemplo: sinal de +, raiz quadrada, parêntese de abertura).
+  * Obrigatoriedade: é necessário inserir ao menos um operador entre cada par de dígitos. Slots antes do primeiro dígito e depois do último dígito são opcionais.
+  * A vitória é validada quando lado esquerdo = lado direito e há pelo menos um símbolo '=' inserido.
+
+- Geração dos Números e Limites de Avaliação:
+  * Os números das placas são gerados de forma puramente aleatória.
+  * Limite superior (hard cap): se qualquer expressão/subexpressão resultar em valor maior que 10.000, a ação é cancelada e o operador em arraste retorna à sua posição inicial.
+  * Divisão por zero: a ação não procede e o operador retorna à sua posição inicial.
+
+- Gameplay e Progressão:
+  * Duração do temporizador por carro: constante.
+  * Pontuação: contagem de carros destruídos/explodidos (animação visual de explosão ao acertar).
+  * Fim de jogo: atingir 0 de vida encerra a partida atual; a pontuação é registrada e o usuário precisa reiniciar do zero para tentar novamente.
+  * Modo de jogo: sobrevivência infinita.
+
+- Recursos Visuais e Integrações:
+  * Assets: todas as imagens/sprites serão carregados via URL (usar URLs placeholder temporárias durante o desenvolvimento).
+  * Equipe (tela de login): Ti Ribeiro Silvério e Giovanna Vieira Gaeta.
+  * Firebase: sem configuração ativa no momento; utilizar arquivos/credenciais placeholder (`DefaultFirebaseOptions` mock).

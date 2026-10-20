@@ -1,30 +1,39 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'package:superweber/main.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:superweber/core/localization/app_localizations.dart';
+import 'package:superweber/core/theme/theme_provider.dart';
+import 'package:superweber/features/game/presentation/game_screen.dart';
+import 'package:superweber/features/game/presentation/widgets/mind_view.dart';
+import 'package:superweber/features/game/presentation/widgets/street_view.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  testWidgets('GameScreen renders StreetView (20%) and MindView (80%)',
+      (WidgetTester tester) async {
+    SharedPreferences.setMockInitialValues({
+      'last_route': '/game',
+      'app_locale': 'pt',
+    });
+    final prefs = await SharedPreferences.getInstance();
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          sharedPreferencesProvider.overrideWithValue(prefs),
+        ],
+        child: const MaterialApp(
+          localizationsDelegates: [
+            AppLocalizations.delegate,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: GameScreen(),
+        ),
+      ),
+    );
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
     await tester.pump();
-
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    expect(find.byType(StreetView), findsOneWidget);
+    expect(find.byType(MindView), findsOneWidget);
   });
 }
