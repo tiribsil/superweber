@@ -1,6 +1,19 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../controllers/game_controller.dart';
+
+class _WeberHopTransform {
+  final double dy;
+  final double scaleX;
+  final double scaleY;
+
+  const _WeberHopTransform({
+    required this.dy,
+    required this.scaleX,
+    required this.scaleY,
+  });
+}
 
 class StreetView extends ConsumerStatefulWidget {
   const StreetView({super.key});
@@ -10,8 +23,9 @@ class StreetView extends ConsumerStatefulWidget {
 }
 
 class _StreetViewState extends ConsumerState<StreetView>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   late final AnimationController _parallaxController;
+  late final AnimationController _hopController;
 
   // Placeholder URLs as requested; user will host custom images later.
   static const String weberCatUrl =
@@ -26,12 +40,58 @@ class _StreetViewState extends ConsumerState<StreetView>
       vsync: this,
       duration: const Duration(seconds: 4),
     )..repeat();
+
+    _hopController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 750),
+    )..repeat();
   }
 
   @override
   void dispose() {
     _parallaxController.dispose();
+    _hopController.dispose();
     super.dispose();
+  }
+
+  _WeberHopTransform _calculateWeberHop(double t, double maxJump) {
+    // 1. dy (vertical jump arc up and down)
+    double dy;
+    if (t >= 0.15 && t < 0.75) {
+      final u = (t - 0.15) / 0.60;
+      dy = -maxJump * 4.0 * u * (1.0 - u);
+    } else {
+      dy = 0.0;
+    }
+
+    // 2. Squish squash & stretch: s < 0 = squash (crouch/impact), s > 0 = stretch
+    double s;
+    if (t < 0.15) {
+      // Anticipation squash before leaping
+      final u = t / 0.15;
+      s = -0.18 * math.sin(u * math.pi);
+    } else if (t < 0.35) {
+      // Takeoff stretch upwards
+      final u = (t - 0.15) / 0.20;
+      s = 0.20 * math.sin(u * math.pi);
+    } else if (t < 0.75) {
+      // Air flight to descent
+      final u = (t - 0.35) / 0.40;
+      s = 0.06 * math.sin(u * math.pi);
+    } else {
+      // Landing impact squash
+      final u = (t - 0.75) / 0.25;
+      s = -0.16 * math.sin(u * math.pi);
+    }
+
+    final scaleY = 1.0 + s;
+    final scaleX = 1.0 - (s * 0.80);
+
+    return _WeberHopTransform(
+      dy: dy,
+      scaleX: scaleX,
+      scaleY: scaleY,
+    );
   }
 
   @override
@@ -75,12 +135,26 @@ class _StreetViewState extends ConsumerState<StreetView>
                 ),
               ),
 
-              // 2. Weber Cat Sprite (Animated GIF filling almost entire height with equal margins)
-              Positioned(
-                left: 14,
-                top: weberTop,
-                width: weberSize,
-                height: weberSize,
+              // 2. Weber Cat Sprite (Animated GIF with vertical bounce and squish squash)
+              AnimatedBuilder(
+                animation: _hopController,
+                builder: (context, child) {
+                  final t = _hopController.value;
+                  final maxJump = (weberSize * 0.18).clamp(8.0, 24.0);
+                  final hop = _calculateWeberHop(t, maxJump);
+
+                  return Positioned(
+                    left: 14,
+                    top: weberTop + hop.dy,
+                    width: weberSize,
+                    height: weberSize,
+                    child: Transform(
+                      alignment: Alignment.bottomCenter,
+                      transform: Matrix4.diagonal3Values(hop.scaleX, hop.scaleY, 1.0),
+                      child: child,
+                    ),
+                  );
+                },
                 child: Image.network(
                   weberCatUrl,
                   fit: BoxFit.contain,
