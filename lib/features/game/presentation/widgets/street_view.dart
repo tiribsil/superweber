@@ -15,7 +15,7 @@ class _StreetViewState extends ConsumerState<StreetView>
 
   // Placeholder URLs as requested; user will host custom images later.
   static const String weberCatUrl =
-      'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=160&q=80';
+      'https://raw.githubusercontent.com/tiribsil/weber/master/public/images/weber_idle.gif';
   static const String carSpriteUrl =
       'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=160&q=80';
 
@@ -75,35 +75,19 @@ class _StreetViewState extends ConsumerState<StreetView>
                 ),
               ),
 
-              // 2. Weber Cat (Filling almost entire height with equal top/bottom margin)
+              // 2. Weber Cat Sprite (Animated GIF filling almost entire height with equal margins)
               Positioned(
                 left: 14,
                 top: weberTop,
                 width: weberSize,
                 height: weberSize,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.black54,
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.purpleAccent, width: 2.5),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.purpleAccent.withValues(alpha: 0.5),
-                        blurRadius: 12,
-                        spreadRadius: 2,
-                      ),
-                    ],
-                  ),
-                  child: ClipOval(
-                    child: Image.network(
-                      weberCatUrl,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) => const Icon(
-                        Icons.pets,
-                        color: Colors.white,
-                        size: 42,
-                      ),
-                    ),
+                child: Image.network(
+                  weberCatUrl,
+                  fit: BoxFit.contain,
+                  errorBuilder: (context, error, stackTrace) => const Icon(
+                    Icons.pets,
+                    color: Colors.white,
+                    size: 42,
                   ),
                 ),
               ),
