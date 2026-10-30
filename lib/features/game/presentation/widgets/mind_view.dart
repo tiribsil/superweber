@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_math_fork/flutter_math.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/localization/app_localizations.dart';
-import '../../domain/models/difficulty_level.dart';
 import '../../domain/models/game_state.dart';
 import '../../domain/models/operator_token.dart';
 import '../controllers/game_controller.dart';
@@ -218,46 +217,53 @@ class _MindViewState extends ConsumerState<MindView> {
           SafeArea(
             child: Column(
               children: [
-                // Top control bar: Difficulty selector & Skip button
+                // Top control bar: Hearts under Weber on the left & Skip / Surrender buttons on the right
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      // Difficulty Dropdown
-                      DropdownButton<DifficultyLevel>(
-                        value: gameState.difficulty,
-                        underline: const SizedBox(),
-                        borderRadius: BorderRadius.circular(12),
-                        items: DifficultyLevel.values.map((d) {
-                          return DropdownMenuItem(
-                            value: d,
-                            child: Text(
-                              d.displayName,
-                              style: const TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                          );
-                        }).toList(),
-                        onChanged: (newDiff) {
-                          if (newDiff != null) {
-                            gameNotifier.setDifficulty(newDiff);
-                          }
-                        },
+                      // Hearts representing lives (positioned directly under Weber)
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.surfaceContainerHigh.withValues(alpha: 0.6),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.2)),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: List.generate(9, (index) {
+                            final isAlive = index < gameState.hp;
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 1.0),
+                              child: Icon(
+                                isAlive ? Icons.favorite : Icons.favorite_border,
+                                color: isAlive ? Colors.redAccent : theme.colorScheme.outline.withValues(alpha: 0.4),
+                                size: 16,
+                              ),
+                            );
+                          }),
+                        ),
                       ),
 
-                      // Clear & Skip buttons
+                      // Actions: Skip plate (mandatory per spec rule 67) & Surrender (adjustment 9)
                       Row(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          IconButton.filledTonal(
-                            tooltip: l10n.translate('clear'),
-                            icon: const Icon(Icons.refresh, size: 20),
-                            onPressed: () => gameNotifier.clearSlots(),
-                          ),
-                          const SizedBox(width: 8),
                           FilledButton.tonalIcon(
                             icon: const Icon(Icons.skip_next, size: 18),
                             label: Text(l10n.translate('skip')),
                             onPressed: () => gameNotifier.skipPlate(),
+                          ),
+                          const SizedBox(width: 8),
+                          FilledButton.tonalIcon(
+                            style: FilledButton.styleFrom(
+                              foregroundColor: theme.colorScheme.error,
+                            ),
+                            icon: const Icon(Icons.flag_outlined, size: 18),
+                            label: Text(l10n.translate('surrender')),
+                            onPressed: () => gameNotifier.surrender(),
                           ),
                         ],
                       ),
@@ -298,8 +304,8 @@ class _MindViewState extends ConsumerState<MindView> {
 
                 const Spacer(flex: 2),
 
-                // Draggable Operators Palette Tray
-                _buildOperatorsTray(context, gameState),
+                // Draggable Operators Palette Tray with Clear Button outside
+                _buildOperatorsArea(context, gameState, gameNotifier, l10n),
 
                 const SizedBox(height: 12),
               ],
@@ -509,6 +515,14 @@ class _MindViewState extends ConsumerState<MindView> {
                 fontWeight: FontWeight.bold,
               ),
               mathStyle: MathStyle.display,
+              onErrorFallback: (err) => Text(
+                latex,
+                style: TextStyle(
+                  fontSize: 18,
+                  color: theme.colorScheme.onSurface,
+                  fontFamily: 'monospace',
+                ),
+              ),
             ),
           ),
           if (state.evaluation.errorMessage != null && !state.evaluation.isSolved)
@@ -528,13 +542,40 @@ class _MindViewState extends ConsumerState<MindView> {
     );
   }
 
+  Widget _buildOperatorsArea(
+    BuildContext context,
+    GameState state,
+    GameController controller,
+    AppLocalizations l10n,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Flexible(
+            child: _buildOperatorsTray(context, state),
+          ),
+          const SizedBox(width: 10),
+          IconButton.filledTonal(
+            tooltip: l10n.translate('clear'),
+            icon: const Icon(Icons.cleaning_services_rounded, size: 24),
+            onPressed: () => controller.clearSlots(),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildOperatorsTray(BuildContext context, GameState state) {
     final theme = Theme.of(context);
     final available = state.difficulty.availableOperators;
 
     return Container(
       constraints: const BoxConstraints(maxWidth: 540),
-      margin: const EdgeInsets.symmetric(horizontal: 16),
+      margin: EdgeInsets.zero,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: theme.colorScheme.surfaceContainerHigh.withValues(alpha: 0.9),

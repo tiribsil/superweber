@@ -190,64 +190,205 @@ class MathEvaluator {
     required List<List<OperatorToken>> slots,
     required List<int> digits,
   }) {
-    final buffer = StringBuffer();
+    final tokens = <dynamic>[];
+    if (slots.isNotEmpty) tokens.addAll(slots[0]);
+    if (digits.isNotEmpty) tokens.add(digits[0]);
+    if (slots.length > 1) tokens.addAll(slots[1]);
+    if (digits.length > 1) tokens.add(digits[1]);
+    if (slots.length > 2) tokens.addAll(slots[2]);
+    if (digits.length > 2) tokens.add(digits[2]);
+    if (slots.length > 3) tokens.addAll(slots[3]);
+    if (digits.length > 3) tokens.add(digits[3]);
+    if (slots.length > 4) tokens.addAll(slots[4]);
 
-    void appendSlot(List<OperatorToken> slot) {
-      for (final t in slot) {
+    final buffer = StringBuffer();
+    int openBraces = 0;
+    int openAbs = 0;
+    int openFloor = 0;
+    int openCeil = 0;
+
+    int i = 0;
+    while (i < tokens.length) {
+      final t = tokens[i];
+      if (t is int) {
+        buffer.write(t);
+        i++;
+      } else if (t is OperatorToken) {
         switch (t.type) {
-          case OperatorType.power:
-            buffer.write('^');
-            break;
           case OperatorType.sqrt:
+            if (i + 1 < tokens.length && tokens[i + 1] == OperatorToken.parenOpen) {
+              final closeIdx = _findMatchingParen(tokens, i + 1);
+              if (closeIdx != -1) {
+                final innerTokens = tokens.sublist(i + 2, closeIdx);
+                buffer.write(r'\sqrt{');
+                buffer.write(_tokensToLatex(innerTokens));
+                buffer.write('}');
+                i = closeIdx + 1;
+                break;
+              }
+            } else if (i + 1 < tokens.length && tokens[i + 1] is int) {
+              buffer.write(r'\sqrt{');
+              buffer.write(tokens[i + 1]);
+              buffer.write('}');
+              i += 2;
+              break;
+            }
             buffer.write(r'\sqrt{');
+            openBraces++;
+            i++;
             break;
+
           case OperatorType.cbrt:
+            if (i + 1 < tokens.length && tokens[i + 1] == OperatorToken.parenOpen) {
+              final closeIdx = _findMatchingParen(tokens, i + 1);
+              if (closeIdx != -1) {
+                final innerTokens = tokens.sublist(i + 2, closeIdx);
+                buffer.write(r'\sqrt[3]{');
+                buffer.write(_tokensToLatex(innerTokens));
+                buffer.write('}');
+                i = closeIdx + 1;
+                break;
+              }
+            } else if (i + 1 < tokens.length && tokens[i + 1] is int) {
+              buffer.write(r'\sqrt[3]{');
+              buffer.write(tokens[i + 1]);
+              buffer.write('}');
+              i += 2;
+              break;
+            }
             buffer.write(r'\sqrt[3]{');
+            openBraces++;
+            i++;
             break;
+
+          case OperatorType.power:
+            if (i + 1 < tokens.length && tokens[i + 1] == OperatorToken.parenOpen) {
+              final closeIdx = _findMatchingParen(tokens, i + 1);
+              if (closeIdx != -1) {
+                final innerTokens = tokens.sublist(i + 2, closeIdx);
+                buffer.write(r'^{');
+                buffer.write(_tokensToLatex(innerTokens));
+                buffer.write('}');
+                i = closeIdx + 1;
+                break;
+              }
+            } else if (i + 1 < tokens.length && tokens[i + 1] is int) {
+              buffer.write(r'^{');
+              buffer.write(tokens[i + 1]);
+              buffer.write('}');
+              i += 2;
+              break;
+            }
+            buffer.write('^');
+            i++;
+            break;
+
           case OperatorType.multiply:
             buffer.write(r' \times ');
+            i++;
             break;
           case OperatorType.divide:
             buffer.write(r' \div ');
+            i++;
             break;
           case OperatorType.equals:
             buffer.write(' = ');
+            i++;
             break;
           case OperatorType.absOpen:
             buffer.write(r'\left|');
+            openAbs++;
+            i++;
             break;
           case OperatorType.absClose:
             buffer.write(r'\right|');
+            if (openAbs > 0) openAbs--;
+            i++;
             break;
           case OperatorType.floorOpen:
             buffer.write(r'\left\lfloor ');
+            openFloor++;
+            i++;
             break;
           case OperatorType.floorClose:
             buffer.write(r'\right\rfloor ');
+            if (openFloor > 0) openFloor--;
+            i++;
             break;
           case OperatorType.ceilOpen:
             buffer.write(r'\left\lceil ');
+            openCeil++;
+            i++;
             break;
           case OperatorType.ceilClose:
             buffer.write(r'\right\rceil ');
+            if (openCeil > 0) openCeil--;
+            i++;
             break;
           default:
             buffer.write(t.latex);
+            i++;
         }
+      } else {
+        i++;
       }
     }
 
-    if (slots.isNotEmpty) appendSlot(slots[0]);
-    if (digits.isNotEmpty) buffer.write(digits[0]);
-    if (slots.length > 1) appendSlot(slots[1]);
-    if (digits.length > 1) buffer.write(digits[1]);
-    if (slots.length > 2) appendSlot(slots[2]);
-    if (digits.length > 2) buffer.write(digits[2]);
-    if (slots.length > 3) appendSlot(slots[3]);
-    if (digits.length > 3) buffer.write(digits[3]);
-    if (slots.length > 4) appendSlot(slots[4]);
+    while (openAbs > 0) {
+      buffer.write(r'\right|');
+      openAbs--;
+    }
+    while (openFloor > 0) {
+      buffer.write(r'\right\rfloor ');
+      openFloor--;
+    }
+    while (openCeil > 0) {
+      buffer.write(r'\right\rceil ');
+      openCeil--;
+    }
+    while (openBraces > 0) {
+      buffer.write('}');
+      openBraces--;
+    }
 
     return buffer.toString();
+  }
+
+  static int _findMatchingParen(List<dynamic> tokens, int openIdx) {
+    int depth = 0;
+    for (int j = openIdx; j < tokens.length; j++) {
+      if (tokens[j] == OperatorToken.parenOpen) {
+        depth++;
+      } else if (tokens[j] == OperatorToken.parenClose) {
+        depth--;
+        if (depth == 0) return j;
+      }
+    }
+    return -1;
+  }
+
+  static String _tokensToLatex(List<dynamic> tokens) {
+    final b = StringBuffer();
+    for (final t in tokens) {
+      if (t is int) {
+        b.write(t);
+      } else if (t is OperatorToken) {
+        switch (t.type) {
+          case OperatorType.multiply:
+            b.write(r' \times ');
+            break;
+          case OperatorType.divide:
+            b.write(r' \div ');
+            break;
+          case OperatorType.power:
+            b.write('^');
+            break;
+          default:
+            b.write(t.latex);
+        }
+      }
+    }
+    return b.toString();
   }
 }
 

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../domain/models/game_state.dart';
 import '../controllers/game_controller.dart';
 
 class StreetView extends ConsumerStatefulWidget {
@@ -43,11 +42,15 @@ class _StreetViewState extends ConsumerState<StreetView>
     return LayoutBuilder(
       builder: (context, constraints) {
         final streetWidth = constraints.maxWidth;
+        final streetHeight = constraints.maxHeight;
+        final carStartX = (streetWidth - 90.0).clamp(100.0, 2000.0);
 
         // Car position: travels from streetWidth - 90 down to Weber at ~60
         final progress = gameState.carProgress;
-        final carStartX = streetWidth - 90;
-        const carEndX = 70.0;
+        final weberMargin = 6.0;
+        final weberSize = (streetHeight - (weberMargin * 2)).clamp(40.0, 160.0);
+        final weberTop = (streetHeight - weberSize) / 2;
+        final carEndX = 14.0 + weberSize + 8.0;
         final carCurrentX = carStartX - (progress * (carStartX - carEndX));
 
         return ClipRect(
@@ -72,21 +75,21 @@ class _StreetViewState extends ConsumerState<StreetView>
                 ),
               ),
 
-              // 2. Weber Cat (Left side of road)
+              // 2. Weber Cat (Filling almost entire height with equal top/bottom margin)
               Positioned(
-                left: 12,
-                bottom: 8,
+                left: 14,
+                top: weberTop,
+                width: weberSize,
+                height: weberSize,
                 child: Container(
-                  width: 58,
-                  height: 58,
                   decoration: BoxDecoration(
                     color: Colors.black54,
                     shape: BoxShape.circle,
-                    border: Border.all(color: Colors.purpleAccent, width: 2),
+                    border: Border.all(color: Colors.purpleAccent, width: 2.5),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.purpleAccent.withValues(alpha: 0.5),
-                        blurRadius: 10,
+                        blurRadius: 12,
                         spreadRadius: 2,
                       ),
                     ],
@@ -98,7 +101,7 @@ class _StreetViewState extends ConsumerState<StreetView>
                       errorBuilder: (context, error, stackTrace) => const Icon(
                         Icons.pets,
                         color: Colors.white,
-                        size: 36,
+                        size: 42,
                       ),
                     ),
                   ),
@@ -201,53 +204,32 @@ class _StreetViewState extends ConsumerState<StreetView>
                   ),
                 ),
 
-              // 4. Top Overlay HUD (Hearts + Timer bar + Score)
+              // 4. Top Overlay HUD (Score badge on top-right)
               Positioned(
-                top: 6,
-                left: 12,
+                top: 8,
                 right: 12,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    // Lives (up to 9 hearts)
-                    Row(
-                      children: List.generate(GameState.maxHp, (index) {
-                        final isFilled = index < gameState.hp;
-                        return Padding(
-                          padding: const EdgeInsets.only(right: 2.0),
-                          child: Icon(
-                            isFilled ? Icons.favorite : Icons.favorite_border,
-                            color: isFilled ? Colors.redAccent : Colors.grey,
-                            size: 16,
-                          ),
-                        );
-                      }),
-                    ),
-
-                    // Cars destroyed (score)
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                      decoration: BoxDecoration(
-                        color: Colors.black54,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.amberAccent, width: 1),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.black54,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.amberAccent, width: 1),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.flash_on, color: Colors.amberAccent, size: 16),
+                      const SizedBox(width: 4),
+                      Text(
+                        '${gameState.score}',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
+                        ),
                       ),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.flash_on, color: Colors.amberAccent, size: 14),
-                          const SizedBox(width: 4),
-                          Text(
-                            '${gameState.score}',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 12,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/localization/app_localizations.dart';
+import '../domain/models/difficulty_level.dart';
 import 'controllers/game_controller.dart';
 import 'widgets/mind_view.dart';
 import 'widgets/street_view.dart';
@@ -87,7 +88,44 @@ class GameScreen extends ConsumerWidget {
                               ],
                             ),
                           ),
-                          const SizedBox(height: 24),
+                          const SizedBox(height: 16),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: theme.colorScheme.outlineVariant),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  l10n.translate('difficulty'),
+                                  style: theme.textTheme.labelLarge?.copyWith(fontWeight: FontWeight.bold),
+                                ),
+                                DropdownButton<DifficultyLevel>(
+                                  value: gameState.difficulty,
+                                  underline: const SizedBox(),
+                                  borderRadius: BorderRadius.circular(12),
+                                  items: DifficultyLevel.values.map((d) {
+                                    return DropdownMenuItem(
+                                      value: d,
+                                      child: Text(
+                                        d.displayName,
+                                        style: const TextStyle(fontWeight: FontWeight.bold),
+                                      ),
+                                    );
+                                  }).toList(),
+                                  onChanged: (newDiff) {
+                                    if (newDiff != null) {
+                                      gameNotifier.setDifficulty(newDiff);
+                                    }
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 20),
                           FilledButton.icon(
                             style: FilledButton.styleFrom(
                               minimumSize: const Size.fromHeight(48),

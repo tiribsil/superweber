@@ -175,5 +175,23 @@ void main() {
         OperatorToken.parenClose,
       ]));
     });
+
+    test('generateLatex auto-closes unclosed sqrt without parser error', () {
+      final slots = [
+        [OperatorToken.sqrt],
+        <OperatorToken>[],
+        <OperatorToken>[],
+        <OperatorToken>[],
+        <OperatorToken>[],
+      ];
+      final digits = [8, 1, 3, 1];
+
+      final latex = MathEvaluator.generateLatex(slots: slots, digits: digits);
+      expect(latex, contains(r'\sqrt{8}'));
+      // No unclosed braces:
+      final openCount = '{'.allMatches(latex).length;
+      final closeCount = '}'.allMatches(latex).length;
+      expect(openCount, equals(closeCount));
+    });
   });
 }

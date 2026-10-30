@@ -170,6 +170,17 @@ class GameController extends Notifier<GameState> {
     _spawnNextCar();
   }
 
+  void surrender() {
+    if (state.isGameOver) return;
+    state = state.copyWith(
+      hp: 0,
+      isGameOver: true,
+      timeRemaining: 0,
+    );
+    _timer?.cancel();
+    _saveScoreToCloud();
+  }
+
   void restartRun() {
     state = GameState.initial(difficulty: state.difficulty).copyWith(
       solvedPlates: state.solvedPlates,

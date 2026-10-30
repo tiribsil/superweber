@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/theme/theme_provider.dart';
+import '../../game/domain/models/difficulty_level.dart';
+import '../../game/presentation/controllers/game_controller.dart';
 
 class LoginScreen extends ConsumerWidget {
   const LoginScreen({super.key});
@@ -14,6 +16,8 @@ class LoginScreen extends ConsumerWidget {
     final theme = Theme.of(context);
     final themeState = ref.watch(themeProvider);
     final themeNotifier = ref.read(themeProvider.notifier);
+    final gameState = ref.watch(gameControllerProvider);
+    final gameNotifier = ref.read(gameControllerProvider.notifier);
     final l10n = AppLocalizations.of(context);
 
     final providers = <fb_auth.AuthProvider>[
@@ -134,6 +138,44 @@ class LoginScreen extends ConsumerWidget {
                         ),
                       ),
 
+                      const SizedBox(height: 16),
+                      // Difficulty selection before starting run
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: theme.colorScheme.outlineVariant),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              l10n.translate('difficulty'),
+                              style: theme.textTheme.labelLarge?.copyWith(fontWeight: FontWeight.bold),
+                            ),
+                            DropdownButton<DifficultyLevel>(
+                              value: gameState.difficulty,
+                              underline: const SizedBox(),
+                              borderRadius: BorderRadius.circular(12),
+                              items: DifficultyLevel.values.map((d) {
+                                return DropdownMenuItem(
+                                  value: d,
+                                  child: Text(
+                                    d.displayName,
+                                    style: const TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                );
+                              }).toList(),
+                              onChanged: (newDiff) {
+                                if (newDiff != null) {
+                                  gameNotifier.setDifficulty(newDiff);
+                                }
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
                       const SizedBox(height: 16),
                       // Guest / Test access button
                       OutlinedButton.icon(
