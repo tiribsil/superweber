@@ -7,6 +7,45 @@ import '../../domain/models/game_state.dart';
 import '../../domain/models/operator_token.dart';
 import '../controllers/game_controller.dart';
 
+abstract class _PlateItem {
+  final GlobalKey key;
+  _PlateItem({required this.key});
+}
+
+class _DigitItem extends _PlateItem {
+  final int digitIndex;
+  final int digit;
+  _DigitItem({
+    required this.digitIndex,
+    required this.digit,
+    required super.key,
+  });
+}
+
+class _OperatorItem extends _PlateItem {
+  final int slotIndex;
+  final int tokenIndex;
+  final OperatorToken token;
+  _OperatorItem({
+    required this.slotIndex,
+    required this.tokenIndex,
+    required this.token,
+    required super.key,
+  });
+}
+
+class _ItemCenter {
+  final double x;
+  final _PlateItem item;
+  _ItemCenter(this.x, this.item);
+}
+
+class _TargetGap {
+  final int slotIndex;
+  final int insertIndex;
+  const _TargetGap(this.slotIndex, this.insertIndex);
+}
+
 class MindView extends ConsumerStatefulWidget {
   const MindView({super.key});
 
@@ -14,23 +53,143 @@ class MindView extends ConsumerStatefulWidget {
   ConsumerState<MindView> createState() => _MindViewState();
 }
 
-class _MindViewState extends ConsumerState<MindView>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _pulseController;
+class _MindViewState extends ConsumerState<MindView> {
+  final GlobalKey _plateKey = GlobalKey();
+  final List<GlobalKey> _digitKeys = List.generate(4, (_) => GlobalKey());
+  final Map<String, GlobalKey> _operatorKeys = {};
 
-  @override
-  void initState() {
-    super.initState();
-    _pulseController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 2),
-    )..repeat(reverse: true);
+  int? _hoverGapIndex;
+
+  GlobalKey _getOperatorKey(int slotIndex, int tokenIndex) {
+    final id = '$slotIndex:$tokenIndex';
+    return _operatorKeys.putIfAbsent(id, () => GlobalKey());
   }
 
-  @override
-  void dispose() {
-    _pulseController.dispose();
-    super.dispose();
+  List<_PlateItem> _buildItemsList(GameState state) {
+    final items = <_PlateItem>[];
+
+    // Slot 0 operators
+    for (int i = 0; i < state.slots[0].length; i++) {
+      items.add(_OperatorItem(
+        slotIndex: 0,
+        tokenIndex: i,
+        token: state.slots[0][i],
+        key: _getOperatorKey(0, i),
+      ));
+    }
+
+    // Digit 0
+    items.add(_DigitItem(digitIndex: 0, digit: state.digits[0], key: _digitKeys[0]));
+
+    // Slot 1 operators
+    for (int i = 0; i < state.slots[1].length; i++) {
+      items.add(_OperatorItem(
+        slotIndex: 1,
+        tokenIndex: i,
+        token: state.slots[1][i],
+        key: _getOperatorKey(1, i),
+      ));
+    }
+
+    // Digit 1
+    items.add(_DigitItem(digitIndex: 1, digit: state.digits[1], key: _digitKeys[1]));
+
+    // Slot 2 operators
+    for (int i = 0; i < state.slots[2].length; i++) {
+      items.add(_OperatorItem(
+        slotIndex: 2,
+        tokenIndex: i,
+        token: state.slots[2][i],
+        key: _getOperatorKey(2, i),
+      ));
+    }
+
+    // Digit 2
+    items.add(_DigitItem(digitIndex: 2, digit: state.digits[2], key: _digitKeys[2]));
+
+    // Slot 3 operators
+    for (int i = 0; i < state.slots[3].length; i++) {
+      items.add(_OperatorItem(
+        slotIndex: 3,
+        tokenIndex: i,
+        token: state.slots[3][i],
+        key: _getOperatorKey(3, i),
+      ));
+    }
+
+    // Digit 3
+    items.add(_DigitItem(digitIndex: 3, digit: state.digits[3], key: _digitKeys[3]));
+
+    // Slot 4 operators
+    for (int i = 0; i < state.slots[4].length; i++) {
+      items.add(_OperatorItem(
+        slotIndex: 4,
+        tokenIndex: i,
+        token: state.slots[4][i],
+        key: _getOperatorKey(4, i),
+      ));
+    }
+
+    return items;
+  }
+
+  double _getDropX(Offset globalOffset) {
+    final plateBox = _plateKey.currentContext?.findRenderObject() as RenderBox?;
+    if (plateBox == null) return 0.0;
+    // Align with dragged chip center (feedback is 46x46 -> center +23,+23)
+    return plateBox.globalToLocal(globalOffset + const Offset(23, 23)).dx;
+  }
+
+  List<_ItemCenter> _getItemCenters(List<_PlateItem> items) {
+    final plateBox = _plateKey.currentContext?.findRenderObject() as RenderBox?;
+    if (plateBox == null) return [];
+
+    final centers = <_ItemCenter>[];
+    for (final item in items) {
+      final box = item.key.currentContext?.findRenderObject() as RenderBox?;
+      if (box != null && box.hasSize) {
+        final localCenter = plateBox.globalToLocal(
+          box.localToGlobal(Offset(box.size.width / 2, box.size.height / 2)),
+        );
+        centers.add(_ItemCenter(localCenter.dx, item));
+      }
+    }
+    return centers;
+  }
+
+  int _calculateGapIndex(double dropX, List<_ItemCenter> itemCenters) {
+    final n = itemCenters.length;
+    if (n == 0) return 1;
+    if (dropX < itemCenters.first.x) return 0;
+    if (dropX >= itemCenters.last.x) return n;
+
+    for (int i = 0; i < n - 1; i++) {
+      if (dropX >= itemCenters[i].x && dropX < itemCenters[i + 1].x) {
+        return i + 1;
+      }
+    }
+    return n;
+  }
+
+  _TargetGap _resolveGap(int gapIndex, List<_PlateItem> items, List<List<OperatorToken>> slots) {
+    if (items.isEmpty) {
+      return const _TargetGap(1, 0);
+    }
+    if (gapIndex <= 0) {
+      return const _TargetGap(0, 0);
+    }
+    if (gapIndex >= items.length) {
+      return _TargetGap(4, slots[4].length);
+    }
+
+    final leftItem = items[gapIndex - 1];
+
+    if (leftItem is _OperatorItem) {
+      return _TargetGap(leftItem.slotIndex, leftItem.tokenIndex + 1);
+    }
+
+    final d = (leftItem as _DigitItem).digitIndex;
+    return _TargetGap(d + 1, 0);
   }
 
   @override
@@ -41,32 +200,17 @@ class _MindViewState extends ConsumerState<MindView>
     final l10n = AppLocalizations.of(context);
 
     return Container(
-      decoration: BoxDecoration(
-        gradient: RadialGradient(
-          center: Alignment.center,
-          radius: 1.1,
-          colors: [
-            theme.colorScheme.primaryContainer.withValues(alpha: 0.18),
-            theme.colorScheme.surface,
-          ],
-        ),
-      ),
+      color: theme.colorScheme.surface,
       child: Stack(
         alignment: Alignment.center,
         children: [
-          // 1. Brain Silhouette & Psychic Aura Painter
+          // 1. Brain Silhouette - completely dark inside without pulsating animation
           Positioned.fill(
-            child: AnimatedBuilder(
-              animation: _pulseController,
-              builder: (context, child) {
-                return CustomPaint(
-                  painter: _BrainSilhouettePainter(
-                    pulse: _pulseController.value,
-                    auraColor: theme.colorScheme.primary.withValues(alpha: 0.25),
-                    brainColor: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.35),
-                  ),
-                );
-              },
+            child: CustomPaint(
+              painter: _BrainSilhouettePainter(
+                fillColor: const Color(0xFF0D0D12),
+                strokeColor: theme.colorScheme.primary.withValues(alpha: 0.35),
+              ),
             ),
           ),
 
@@ -133,19 +277,23 @@ class _MindViewState extends ConsumerState<MindView>
                     ),
                     child: Text(
                       gameState.lastError!,
-                      style: const TextStyle(color: Colors.redAccent, fontSize: 12, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                        color: Colors.redAccent,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
                       textAlign: TextAlign.center,
                     ),
                   ),
 
                 const Spacer(flex: 1),
 
-                // License Plate with Slots & Digits
+                // Spatial drag-and-drop equation plate
                 _buildPlateWithSlots(context, gameState, gameNotifier),
 
-                const SizedBox(height: 14),
+                const SizedBox(height: 18),
 
-                // LaTeX Formula Display (Mandatory requirement)
+                // LaTeX Formula Display
                 _buildLatexDisplay(context, gameState),
 
                 const Spacer(flex: 2),
@@ -167,140 +315,166 @@ class _MindViewState extends ConsumerState<MindView>
     GameState state,
     GameController controller,
   ) {
+    final items = _buildItemsList(state);
+
+    return DragTarget<OperatorToken>(
+      onWillAcceptWithDetails: (details) => true,
+      onMove: (details) {
+        final centers = _getItemCenters(items);
+        if (centers.isNotEmpty) {
+          final dropX = _getDropX(details.offset);
+          final gap = _calculateGapIndex(dropX, centers);
+          if (_hoverGapIndex != gap) {
+            setState(() {
+              _hoverGapIndex = gap;
+            });
+          }
+        }
+      },
+      onLeave: (data) {
+        if (_hoverGapIndex != null) {
+          setState(() {
+            _hoverGapIndex = null;
+          });
+        }
+      },
+      onAcceptWithDetails: (details) {
+        final centers = _getItemCenters(items);
+        final dropX = _getDropX(details.offset);
+        final gap = _calculateGapIndex(dropX, centers);
+        final target = _resolveGap(gap, items, state.slots);
+
+        setState(() {
+          _hoverGapIndex = null;
+        });
+
+        controller.addOperatorToSlot(
+          target.slotIndex,
+          details.data,
+          insertIndex: target.insertIndex,
+        );
+      },
+      builder: (context, candidateData, rejectedData) {
+        final isHovered = candidateData.isNotEmpty;
+
+        final rowChildren = <Widget>[];
+        for (int i = 0; i < items.length; i++) {
+          if (_hoverGapIndex == i) {
+            rowChildren.add(_buildInsertionIndicator());
+          }
+          final item = items[i];
+          if (item is _DigitItem) {
+            rowChildren.add(_buildDigitTile(item));
+          } else if (item is _OperatorItem) {
+            rowChildren.add(_buildOperatorTile(item, controller));
+          }
+        }
+
+        if (_hoverGapIndex == items.length) {
+          rowChildren.add(_buildInsertionIndicator());
+        }
+
+        return Container(
+          key: _plateKey,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          margin: const EdgeInsets.symmetric(horizontal: 8),
+          constraints: const BoxConstraints(minHeight: 70),
+          decoration: BoxDecoration(
+            color: isHovered
+                ? Colors.white.withValues(alpha: 0.04)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(16),
+            border: isHovered
+                ? Border.all(color: Colors.amberAccent.withValues(alpha: 0.3), width: 1.5)
+                : null,
+          ),
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: rowChildren,
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildInsertionIndicator() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      margin: const EdgeInsets.symmetric(horizontal: 12),
+      width: 3,
+      height: 48,
+      margin: const EdgeInsets.symmetric(horizontal: 4),
       decoration: BoxDecoration(
-        color: Colors.black87,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.amberAccent, width: 2),
-        boxShadow: const [
-          BoxShadow(color: Colors.black54, blurRadius: 10, offset: Offset(0, 4)),
+        color: Colors.amberAccent,
+        borderRadius: BorderRadius.circular(2),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.amberAccent.withValues(alpha: 0.8),
+            blurRadius: 8,
+            spreadRadius: 2,
+          ),
         ],
       ),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            _buildSlotTarget(0, state.slots[0], controller, isOptional: true),
-            _buildDigitTile(state.digits[0]),
-            _buildSlotTarget(1, state.slots[1], controller, isOptional: false),
-            _buildDigitTile(state.digits[1]),
-            _buildSlotTarget(2, state.slots[2], controller, isOptional: false),
-            _buildDigitTile(state.digits[2]),
-            _buildSlotTarget(3, state.slots[3], controller, isOptional: false),
-            _buildDigitTile(state.digits[3]),
-            _buildSlotTarget(4, state.slots[4], controller, isOptional: true),
+    );
+  }
+
+  Widget _buildDigitTile(_DigitItem item) {
+    return Container(
+      key: item.key,
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      child: Text(
+        '${item.digit}',
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 44,
+          fontWeight: FontWeight.w900,
+          fontFamily: 'Courier',
+          letterSpacing: 1,
+          shadows: [
+            Shadow(
+              color: Colors.black87,
+              blurRadius: 6,
+              offset: Offset(0, 2),
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildDigitTile(int digit) {
+  Widget _buildOperatorTile(_OperatorItem item, GameController controller) {
     return Container(
-      width: 44,
-      height: 60,
-      margin: const EdgeInsets.symmetric(horizontal: 2),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFFEEEEEE), Color(0xFFBDBDBD)],
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-        ),
+      key: item.key,
+      margin: const EdgeInsets.symmetric(horizontal: 3),
+      child: InkWell(
+        onTap: () => controller.removeOperatorFromSlot(item.slotIndex, item.tokenIndex),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.black, width: 2),
-        boxShadow: const [
-          BoxShadow(color: Colors.black26, blurRadius: 4, offset: Offset(0, 2)),
-        ],
-      ),
-      alignment: Alignment.center,
-      child: Text(
-        '$digit',
-        style: const TextStyle(
-          color: Colors.black,
-          fontSize: 34,
-          fontWeight: FontWeight.w900,
-          fontFamily: 'Courier',
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSlotTarget(
-    int slotIndex,
-    List<OperatorToken> tokens,
-    GameController controller, {
-    required bool isOptional,
-  }) {
-    return DragTarget<OperatorToken>(
-      onWillAcceptWithDetails: (details) => true,
-      onAcceptWithDetails: (details) {
-        controller.addOperatorToSlot(slotIndex, details.data);
-      },
-      builder: (context, candidateData, rejectedData) {
-        final isHovered = candidateData.isNotEmpty;
-        final isEmpty = tokens.isEmpty;
-
-        return AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          constraints: const BoxConstraints(minWidth: 32, minHeight: 60),
-          margin: const EdgeInsets.symmetric(horizontal: 2),
-          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
           decoration: BoxDecoration(
-            color: isHovered
-                ? Colors.purple.withValues(alpha: 0.5)
-                : (isEmpty
-                    ? (isOptional ? Colors.grey.withValues(alpha: 0.15) : Colors.amber.withValues(alpha: 0.18))
-                    : Colors.purple.withValues(alpha: 0.3)),
+            color: Colors.purple.shade700,
             borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-              color: isHovered
-                  ? Colors.amberAccent
-                  : (isEmpty ? (isOptional ? Colors.white24 : Colors.amberAccent.withValues(alpha: 0.6)) : Colors.purpleAccent),
-              width: isHovered ? 2 : 1,
+            border: Border.all(color: Colors.purpleAccent, width: 1.2),
+            boxShadow: const [
+              BoxShadow(
+                color: Colors.black45,
+                blurRadius: 4,
+                offset: Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Text(
+            item.token.label,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
             ),
           ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: tokens.isEmpty
-                ? [
-                    if (!isOptional)
-                      const Text(
-                        '•',
-                        style: TextStyle(color: Colors.amberAccent, fontSize: 16),
-                      ),
-                  ]
-                : tokens.asMap().entries.map((entry) {
-                    final idx = entry.key;
-                    final tok = entry.value;
-                    return InkWell(
-                      onTap: () => controller.removeOperatorFromSlot(slotIndex, idx),
-                      borderRadius: BorderRadius.circular(6),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 3),
-                        margin: const EdgeInsets.symmetric(horizontal: 1.5),
-                        decoration: BoxDecoration(
-                          color: Colors.purple.shade700,
-                          borderRadius: BorderRadius.circular(6),
-                          border: Border.all(color: Colors.purpleAccent, width: 1),
-                        ),
-                        child: Text(
-                          tok.label,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    );
-                  }).toList(),
-          ),
-        );
-      },
+        ),
+      ),
     );
   }
 
@@ -313,10 +487,12 @@ class _MindViewState extends ConsumerState<MindView>
       margin: const EdgeInsets.symmetric(horizontal: 20),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.7),
+        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.85),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
-          color: state.evaluation.isSolved ? Colors.greenAccent : theme.colorScheme.outlineVariant,
+          color: state.evaluation.isSolved
+              ? Colors.greenAccent
+              : theme.colorScheme.outlineVariant,
           width: state.evaluation.isSolved ? 2 : 1,
         ),
       ),
@@ -361,7 +537,7 @@ class _MindViewState extends ConsumerState<MindView>
       margin: const EdgeInsets.symmetric(horizontal: 16),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHigh.withValues(alpha: 0.85),
+        color: theme.colorScheme.surfaceContainerHigh.withValues(alpha: 0.9),
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.2)),
         boxShadow: const [
@@ -445,56 +621,53 @@ class _MindViewState extends ConsumerState<MindView>
 }
 
 class _BrainSilhouettePainter extends CustomPainter {
-  final double pulse;
-  final Color auraColor;
-  final Color brainColor;
+  final Color fillColor;
+  final Color strokeColor;
 
   _BrainSilhouettePainter({
-    required this.pulse,
-    required this.auraColor,
-    required this.brainColor,
+    required this.fillColor,
+    required this.strokeColor,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width * 0.5, size.height * 0.45);
-    final brainRadius = size.width * 0.38;
-
-    // Psychic glowing aura
-    final auraPaint = Paint()
-      ..color = auraColor.withValues(alpha: 0.12 + (0.10 * pulse))
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 28);
-    canvas.drawCircle(center, brainRadius * (1.0 + 0.08 * pulse), auraPaint);
-
-    // Brain cranial outline (Weber cat head profile / brain curves)
-    final path = Path();
     final w = size.width;
     final h = size.height;
 
-    // Curved head contour
-    path.moveTo(w * 0.15, h * 0.8);
-    path.quadraticBezierTo(w * 0.08, h * 0.45, w * 0.25, h * 0.25);
-    // Cat ears
-    path.lineTo(w * 0.20, h * 0.12);
-    path.lineTo(w * 0.38, h * 0.18);
-    // Head top
-    path.quadraticBezierTo(w * 0.5, h * 0.14, w * 0.62, h * 0.18);
-    // Right cat ear
-    path.lineTo(w * 0.80, h * 0.12);
-    path.lineTo(w * 0.75, h * 0.25);
-    // Right contour
-    path.quadraticBezierTo(w * 0.92, h * 0.45, w * 0.85, h * 0.8);
+    // Cat head silhouette path
+    final path = Path();
+    path.moveTo(w * 0.12, h * 0.95);
+    // Left cheek
+    path.quadraticBezierTo(w * 0.05, h * 0.55, w * 0.18, h * 0.32);
+    // Left ear outer edge
+    path.lineTo(w * 0.16, h * 0.08);
+    // Left ear inner edge
+    path.lineTo(w * 0.38, h * 0.22);
+    // Head top curvature between ears
+    path.quadraticBezierTo(w * 0.50, h * 0.18, w * 0.62, h * 0.22);
+    // Right ear inner edge
+    path.lineTo(w * 0.84, h * 0.08);
+    // Right ear outer edge
+    path.lineTo(w * 0.82, h * 0.32);
+    // Right cheek
+    path.quadraticBezierTo(w * 0.95, h * 0.55, w * 0.88, h * 0.95);
+    path.close();
 
+    // Fill completely dark inside
+    final fillPaint = Paint()
+      ..color = fillColor
+      ..style = PaintingStyle.fill;
+    canvas.drawPath(path, fillPaint);
+
+    // Subtle outline
     final strokePaint = Paint()
-      ..color = brainColor
-      ..strokeWidth = 2.5
+      ..color = strokeColor
+      ..strokeWidth = 2.0
       ..style = PaintingStyle.stroke;
     canvas.drawPath(path, strokePaint);
   }
 
   @override
   bool shouldRepaint(_BrainSilhouettePainter oldDelegate) =>
-      oldDelegate.pulse != pulse ||
-      oldDelegate.auraColor != auraColor ||
-      oldDelegate.brainColor != brainColor;
+      oldDelegate.fillColor != fillColor || oldDelegate.strokeColor != strokeColor;
 }

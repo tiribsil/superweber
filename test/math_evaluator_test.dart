@@ -152,5 +152,28 @@ void main() {
       expect(result.isSolved, isFalse); // 2.5 != 2
       expect(result.lhsValue, equals(2.5));
     });
+
+    test('Slot insertion: left (insertIndex 0) vs right (insertIndex 1)', () {
+      final slots = [
+        <OperatorToken>[],
+        [OperatorToken.plus],
+        <OperatorToken>[],
+        <OperatorToken>[],
+        <OperatorToken>[],
+      ];
+
+      // Insert sqrt to the left of plus (insertIndex 0)
+      slots[1].insert(0, OperatorToken.sqrt);
+      expect(slots[1].first, equals(OperatorToken.sqrt));
+      expect(slots[1].last, equals(OperatorToken.plus));
+
+      // Insert parenClose to the right of plus (insertIndex 2)
+      slots[1].insert(2, OperatorToken.parenClose);
+      expect(slots[1], equals([
+        OperatorToken.sqrt,
+        OperatorToken.plus,
+        OperatorToken.parenClose,
+      ]));
+    });
   });
 }

@@ -84,14 +84,19 @@ class GameController extends Notifier<GameState> {
   }
 
   /// Attempts to insert an operator into a given slot.
+  /// If [insertIndex] is provided, inserts at that position; otherwise appends.
   /// Returns false if rejected due to overflow (> 10000) or division by zero.
-  bool addOperatorToSlot(int slotIndex, OperatorToken token) {
+  bool addOperatorToSlot(int slotIndex, OperatorToken token, {int? insertIndex}) {
     if (slotIndex < 0 || slotIndex >= 5) return false;
     if (state.isGameOver || state.isExploding) return false;
 
     // Build speculative slots
     final newSlots = state.slots.map((s) => List<OperatorToken>.from(s)).toList();
-    newSlots[slotIndex].add(token);
+    if (insertIndex != null && insertIndex >= 0 && insertIndex <= newSlots[slotIndex].length) {
+      newSlots[slotIndex].insert(insertIndex, token);
+    } else {
+      newSlots[slotIndex].add(token);
+    }
 
     // Validate if it violates hard constraints
     final isAllowed = MathEvaluator.canPlaceWithoutViolation(
