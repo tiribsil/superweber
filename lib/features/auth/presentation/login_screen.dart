@@ -32,12 +32,14 @@ class LoginScreen extends ConsumerWidget {
 
     final emailProvider = fb_auth.EmailAuthProvider();
     final googleProvider = GoogleProvider(clientId: googleClientId);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
+      backgroundColor: isDark ? theme.colorScheme.surface : const Color.fromARGB(255, 156, 170, 250),
       body: Stack(
         fit: StackFit.expand,
         children: [
-          // 1. Butterfly: Centered on mobile; original offset (left: 800) on web
+          // 1. Butterfly: 
           Positioned(
             top: 0,
             bottom: 0,
@@ -235,14 +237,14 @@ class LoginScreen extends ConsumerWidget {
                         state,
                       ) {
                         Navigator.of(dialogCtx).pop();
-                        context.go('/difficulty');
+                        context.go('/history');
                       }),
                       fb_auth.AuthStateChangeAction<fb_auth.UserCreated>((
                         ctx,
                         state,
                       ) {
                         Navigator.of(dialogCtx).pop();
-                        context.go('/difficulty');
+                        context.go('/history');
                       }),
                     ],
                     child: Column(
@@ -326,7 +328,7 @@ class LoginScreen extends ConsumerWidget {
                           label: Text(l10n.playAsGuest),
                           onPressed: () {
                             Navigator.of(dialogCtx).pop();
-                            context.go('/difficulty');
+                            context.go('/history');
                           },
                         ),
                       ],
@@ -385,14 +387,14 @@ class LoginScreen extends ConsumerWidget {
                         state,
                       ) {
                         Navigator.of(dialogCtx).pop();
-                        context.go('/difficulty');
+                        context.go('/history');
                       }),
                       fb_auth.AuthStateChangeAction<fb_auth.UserCreated>((
                         ctx,
                         state,
                       ) {
                         Navigator.of(dialogCtx).pop();
-                        context.go('/difficulty');
+                        context.go('/history');
                       }),
                     ],
                     child: Column(

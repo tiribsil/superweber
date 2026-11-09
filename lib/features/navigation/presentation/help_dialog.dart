@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 
 import '../../../core/localization/app_localizations.dart';
 
-void showHelpDialog(BuildContext context) {
+// Change 'void' to 'Future<void>' and add 'return'
+Future<void> showHelpDialog(BuildContext context) {
   final l10n = AppLocalizations.of(context)!;
   final theme = Theme.of(context);
 
-  showDialog(
+  return showDialog<void>(
     context: context,
     builder: (ctx) => AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),

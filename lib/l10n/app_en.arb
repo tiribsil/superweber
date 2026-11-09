@@ -77,5 +77,7 @@
   "easyDesc": "Division allows non-integer results (e.g. 5/2). Standard arithmetic, roots, powers, factorials, modulo, floor and ceiling.",
   "intermediateDesc": "Division must result in integers. Includes cube root and powers.",
   "advancedDesc": "Division must result in integers. Square root, factorial, modulo, and basic operations.",
-  "hardDesc": "Division must result in integers. Only basic operations, parentheses, and modulo."
+  "hardDesc": "Division must result in integers. Only basic operations, parentheses, and modulo.",
+  "historyIntro": "This is Weber.\nLike every cat, his dream is to take over the world.\nBut Weber isn't just any cat, he has superpowers!\nHe can blow up cars using only his mind.\nBut to do that, he needs to turn their license plates into an equation!\nHelp Weber cause destruction with the power of math!",
+  "skip" : "skip"
 }

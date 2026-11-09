@@ -400,9 +400,10 @@ class _MindViewState extends ConsumerState<MindView> {
             .toDouble();
         final compactActions = maxWidth < 380;
         final horizontalInset = maxWidth < 380 ? 8.0 : 16.0;
+        final isDark = theme.brightness == Brightness.dark;
 
         return Container(
-          color: theme.colorScheme.surface,
+          color: isDark ? theme.colorScheme.surface : const Color.fromARGB(255, 156, 170, 250),
           child: Stack(
             alignment: Alignment.center,
             children: [

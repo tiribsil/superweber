@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../features/auth/presentation/login_screen.dart';
 import '../../features/game/presentation/game_screen.dart';
 import '../../features/game/presentation/screens/difficulty_selection_screen.dart';
+import '../../features/game/presentation/screens/history_screen.dart';
 import '../../features/navigation/presentation/main_scaffold.dart';
 import '../../features/records/presentation/records_screen.dart';
 import '../../features/settings/presentation/settings_screen.dart';
@@ -18,6 +19,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     initialLocation: savedRoute,
     routes: [
       GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
+      GoRoute(
+        path: '/history', // <-- Added history route
+        builder: (context, state) => const HistoryScreen(),
+      ),
       GoRoute(
         path: '/difficulty',
         builder: (context, state) => const DifficultySelectionScreen(),
@@ -52,7 +57,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       try {
         final auth = FirebaseAuth.instance;
         final user = auth.currentUser ?? await auth.authStateChanges().first;
-        if (user != null && loc == '/login') return '/difficulty';
+        // Redirect to /history instead of /difficulty on login
+        if (user != null && loc == '/login') return '/history';
       } catch (_) {}
       return null;
     },

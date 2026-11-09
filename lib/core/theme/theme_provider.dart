@@ -96,7 +96,6 @@ class ThemeNotifier extends Notifier<ThemeState> {
     return ThemeData(
       useMaterial3: true,
       colorSchemeSeed: state.seedColor,
-      scaffoldBackgroundColor: const Color.fromARGB(255, 85, 174, 218),
       brightness: Brightness.light,
       fontFamily: state.fontFamily,
       textTheme: _scaleTextTheme(ThemeData.light().textTheme),
