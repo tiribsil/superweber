@@ -79,7 +79,7 @@
   "advancedDesc": "Division must result in integers. Square root, factorial, modulo, and basic operations.",
   "hardDesc": "Division must result in integers. Only basic operations, parentheses, and modulo.",
   "historyIntro": "This is Weber.\nLike every cat, his dream is to take over the world.\nBut Weber isn't just any cat, he has superpowers!\nHe can blow up cars using only his mind.\nBut to do that, he needs to turn their license plates into an equation!\nHelp Weber cause destruction with the power of math!",
-  "skip": "skip",
+  "skip": "Skip",
   "tutorialTitle": "How to Play",
   "tutorialContinue": "Got It!",
   "tutorialPanel1Title": "Make Equations",
