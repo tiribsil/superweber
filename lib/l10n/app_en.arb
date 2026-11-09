@@ -79,5 +79,15 @@
   "advancedDesc": "Division must result in integers. Square root, factorial, modulo, and basic operations.",
   "hardDesc": "Division must result in integers. Only basic operations, parentheses, and modulo.",
   "historyIntro": "This is Weber.\nLike every cat, his dream is to take over the world.\nBut Weber isn't just any cat, he has superpowers!\nHe can blow up cars using only his mind.\nBut to do that, he needs to turn their license plates into an equation!\nHelp Weber cause destruction with the power of math!",
-  "skip" : "skip"
+  "skip": "skip",
+  "tutorialTitle": "How to Play",
+  "tutorialContinue": "Got It!",
+  "tutorialPanel1Title": "Make Equations",
+  "tutorialPanel1Desc": "Turn the plate numbers into a correct equation to destroy the car!",
+  "tutorialPanel2Title": "Drag Operators",
+  "tutorialPanel2Desc": "Drag math symbols into the slots between the numbers to change the formula.",
+  "tutorialPanel3Title": "Beat the Clock",
+  "tutorialPanel3Desc": "Solve it fast before the car hits Weber and costs you a life!",
+  "tutorialPanel4Title": "Blast All Cars!",
+  "tutorialPanel4Desc": "Destroy as many cars as you can to set the ultimate high score!"
 }

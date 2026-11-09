@@ -1,12 +1,12 @@
 import 'dart:async';
 import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/localization/app_localizations.dart';
-import '../../../../core/theme/theme_provider.dart';
 
 class HistoryScreen extends ConsumerStatefulWidget {
   const HistoryScreen({super.key});
@@ -26,9 +26,15 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
   final ScrollController _textScrollController = ScrollController();
 
   // Configuration timings
-  static const Duration _startDelay = Duration(seconds: 1); // 1-second pause before starting
-  static const Duration _charDelay = Duration(milliseconds: 50); // Speed per character
-  static const Duration _lineBreakDelay = Duration(milliseconds: 650); // Pause on \n
+  static const Duration _startDelay = Duration(
+    seconds: 1,
+  ); // 1-second pause before starting
+  static const Duration _charDelay = Duration(
+    milliseconds: 50,
+  ); // Speed per character
+  static const Duration _lineBreakDelay = Duration(
+    milliseconds: 650,
+  ); // Pause on \n
 
   @override
   void didChangeDependencies() {
@@ -93,7 +99,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
 
   void _goToNext() {
     _typingTimer?.cancel();
-    context.go('/difficulty');
+    context.go('/tutorial');
   }
 
   @override
@@ -116,8 +122,8 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     final scale = isMobile
         ? 1.0
         : math
-            .min(screenSize.height / 1080.0, screenSize.width / 1920.0)
-            .clamp(0.5, 1.2);
+              .min(screenSize.height / 1080.0, screenSize.width / 1920.0)
+              .clamp(0.5, 1.2);
 
     return Scaffold(
       backgroundColor: isDark
@@ -148,13 +154,14 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                   final bottomMargin = isMobile ? 8.0 : 16.0 * scale;
 
                   // 3/4 & 4/4 area: Text box takes all the remaining space to the bottom
-                  final textBoxHeight = (maxH -
-                          topSpace -
-                          imageSize -
-                          middleGap -
-                          promptHeight -
-                          bottomMargin)
-                      .clamp(200.0, maxH * 0.55);
+                  final textBoxHeight =
+                      (maxH -
+                              topSpace -
+                              imageSize -
+                              middleGap -
+                              promptHeight -
+                              bottomMargin)
+                          .clamp(200.0, maxH * 0.55);
 
                   // Comfortable side margins
                   final horizontalMargin = isMobile ? 28.0 : 40.0;
@@ -214,8 +221,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                                   Shadow(
                                     offset: const Offset(1, 2),
                                     blurRadius: 4,
-                                    color:
-                                        Colors.black.withValues(alpha: 0.15),
+                                    color: Colors.black.withValues(alpha: 0.15),
                                   ),
                                 ],
                               ),
@@ -280,7 +286,8 @@ class _CuteSkipButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isMobile = MediaQuery.sizeOf(context).width < 900 ||
+    final isMobile =
+        MediaQuery.sizeOf(context).width < 900 ||
         MediaQuery.sizeOf(context).width < MediaQuery.sizeOf(context).height;
     final borderRadius = BorderRadius.circular(30);
 

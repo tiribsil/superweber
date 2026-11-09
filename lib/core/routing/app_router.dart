@@ -6,6 +6,7 @@ import '../../features/auth/presentation/login_screen.dart';
 import '../../features/game/presentation/game_screen.dart';
 import '../../features/game/presentation/screens/difficulty_selection_screen.dart';
 import '../../features/game/presentation/screens/history_screen.dart';
+import '../../features/game/presentation/screens/tutorial_screen.dart';
 import '../../features/navigation/presentation/main_scaffold.dart';
 import '../../features/records/presentation/records_screen.dart';
 import '../../features/settings/presentation/settings_screen.dart';
@@ -22,6 +23,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/history', // <-- Added history route
         builder: (context, state) => const HistoryScreen(),
+      ),
+      GoRoute(
+        path: '/tutorial',
+        builder: (context, state) => const TutorialScreen(),
       ),
       GoRoute(
         path: '/difficulty',
