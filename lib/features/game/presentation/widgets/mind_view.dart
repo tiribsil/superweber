@@ -657,46 +657,59 @@ class _MindViewState extends ConsumerState<MindView> {
               child: LayoutBuilder(
                 builder: (context, brainConstraints) {
                   final brainFrameHeight = brainConstraints.maxHeight;
+                  final brainFrameWidth = brainConstraints.maxWidth;
                   // Every plate dimension uses the same unbounded scale as the brain frame.
                   final plateScale = brainFrameHeight / 240;
                   final digitFontSize = brainFrameHeight * 0.2;
                   final actionExtent = 56.0 * plateScale;
+                  final horizontalInset = brainFrameWidth < 380 ? 8.0 : 16.0;
+                  final maxPlateWidth =
+                      (brainFrameWidth - (horizontalInset * 2) - actionExtent)
+                          .clamp(0.0, double.infinity);
+                  final expectedPlateHeight =
+                      digitFontSize * 1.25 + 28 * plateScale;
+                  final targetCenterY =
+                      (brainFrameHeight * 0.27) + (expectedPlateHeight / 2);
 
                   return Stack(
                     alignment: Alignment.center,
                     clipBehavior: Clip.none,
                     children: [
                       Positioned(
-                        top: brainFrameHeight * 0.27,
-                        child: Transform.translate(
-                          // Keep the plate centered while Clear stays beside it.
-                          offset: Offset(actionExtent / 2, 0),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              _buildPlateWithSlots(
-                                context,
-                                state,
-                                controller,
-                                plateScale,
-                                digitFontSize,
-                                chipSize,
-                              ),
-                              SizedBox(width: 8 * plateScale),
-                              SizedBox(
-                                width: 48 * plateScale,
-                                height: 48 * plateScale,
-                                child: IconButton.filledTonal(
-                                  tooltip: l10n.clear,
-                                  icon: Icon(
-                                    Icons.cleaning_services_rounded,
-                                    size: 24 * plateScale,
-                                  ),
-                                  onPressed: () => controller.clearSlots(),
+                        top: targetCenterY,
+                        left: horizontalInset,
+                        right: horizontalInset,
+                        child: FractionalTranslation(
+                          translation: const Offset(0.0, -0.5),
+                          child: Center(
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                _buildPlateWithSlots(
+                                  context,
+                                  state,
+                                  controller,
+                                  plateScale,
+                                  digitFontSize,
+                                  chipSize,
+                                  maxPlateWidth,
                                 ),
-                              ),
-                            ],
+                                SizedBox(width: 8 * plateScale),
+                                SizedBox(
+                                  width: 48 * plateScale,
+                                  height: 48 * plateScale,
+                                  child: IconButton.filledTonal(
+                                    tooltip: l10n.clear,
+                                    icon: Icon(
+                                      Icons.cleaning_services_rounded,
+                                      size: 24 * plateScale,
+                                    ),
+                                    onPressed: () => controller.clearSlots(),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
@@ -718,6 +731,7 @@ class _MindViewState extends ConsumerState<MindView> {
     double scale,
     double digitFontSize,
     double chipSize,
+    double maxPlateWidth,
   ) {
     final items = _buildItemsList(state);
 
@@ -784,34 +798,41 @@ class _MindViewState extends ConsumerState<MindView> {
             : MultiSlicePlatePainter(image: plateImage);
         final expectedPlateHeight = digitFontSize * 1.25 + 28 * scale;
 
-        return CustomPaint(
-          painter: painter,
-          child: Container(
-            key: _plateKey,
-            constraints: painter == null
-                ? null
-                : BoxConstraints(
-                    minWidth: painter.minimumWidthForHeight(
-                      expectedPlateHeight,
-                    ),
-                  ),
-            padding: EdgeInsets.fromLTRB(
-              20 * scale,
-              20 * scale,
-              20 * scale,
-              4 * scale,
-            ),
-            margin: EdgeInsets.zero,
-            decoration: BoxDecoration(
-              color: plateImage == null ? const Color(0xFFD8B177) : null,
-              border: isHovered
-                  ? Border.all(color: Colors.amberAccent, width: 2.5)
-                  : null,
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: rowChildren,
+        return ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: maxPlateWidth),
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.center,
+            child: CustomPaint(
+              painter: painter,
+              child: Container(
+                key: _plateKey,
+                constraints: painter == null
+                    ? null
+                    : BoxConstraints(
+                        minWidth: painter.minimumWidthForHeight(
+                          expectedPlateHeight,
+                        ),
+                      ),
+                padding: EdgeInsets.fromLTRB(
+                  20 * scale,
+                  20 * scale,
+                  20 * scale,
+                  4 * scale,
+                ),
+                margin: EdgeInsets.zero,
+                decoration: BoxDecoration(
+                  color: plateImage == null ? const Color(0xFFD8B177) : null,
+                  border: isHovered
+                      ? Border.all(color: Colors.amberAccent, width: 2.5)
+                      : null,
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: rowChildren,
+                ),
+              ),
             ),
           ),
         );
