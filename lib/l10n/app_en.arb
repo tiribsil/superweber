@@ -82,12 +82,12 @@
   "skip": "Skip",
   "tutorialTitle": "How to Play",
   "tutorialContinue": "Got It!",
-  "tutorialPanel1Title": "Make Equations",
+  "tutorialPanel1Title": "Equalize",
   "tutorialPanel1Desc": "Turn the plate numbers into a correct equation to destroy the car!",
-  "tutorialPanel2Title": "Drag Operators",
-  "tutorialPanel2Desc": "Drag math symbols into the slots between the numbers to change the formula.",
-  "tutorialPanel3Title": "Beat the Clock",
-  "tutorialPanel3Desc": "Solve it fast before the car hits Weber and costs you a life!",
-  "tutorialPanel4Title": "Blast All Cars!",
+  "tutorialPanel2Title": "Drag the operators",
+  "tutorialPanel2Desc": "Drag math symbols between the numbers to change the formula.",
+  "tutorialPanel3Title": "Gotta go fast!",
+  "tutorialPanel3Desc": "Solve it fast before the car hits Weber!",
+  "tutorialPanel4Title": "Blast'em all!",
   "tutorialPanel4Desc": "Destroy as many cars as you can to set the ultimate high score!"
 }
