@@ -193,40 +193,32 @@ class LoginScreen extends ConsumerWidget {
             child: SafeArea(
               top: false,
               left: false,
-              child: Text(
-                l10n.authors,
-                textAlign: isMobile ? TextAlign.center : TextAlign.right,
-                style: GoogleFonts.gaegu(
-                  fontSize: isMobile ? 18 : 18 * scale,
-                  fontWeight: FontWeight.w400,
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ),
-          ),
-
-          // 6. Top-Right Quick Sound Toggle
-          Positioned(
-            top: isMobile ? 16 : 28 * scale,
-            right: isMobile ? 16 : 28 * scale,
-            child: SafeArea(
-              child: Material(
-                color: Colors.transparent,
-                child: IconButton.filled(
-                  style: IconButton.styleFrom(
-                    backgroundColor: const Color.fromARGB(255, 255, 146, 209),
-                    foregroundColor: Colors.white,
-                    elevation: 4,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: isMobile
+                    ? CrossAxisAlignment.center
+                    : CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    l10n.authors,
+                    textAlign: isMobile ? TextAlign.center : TextAlign.right,
+                    style: GoogleFonts.gaegu(
+                      fontSize: isMobile ? 18 : 18 * scale,
+                      fontWeight: FontWeight.w400,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
                   ),
-                  icon: Icon(
-                    soundEnabled
-                        ? Icons.volume_up_rounded
-                        : Icons.volume_off_rounded,
-                    size: isMobile ? 24 : 28 * scale,
+                  SizedBox(height: isMobile ? 2 : 2 * scale),
+                  Text(
+                    l10n.soundCredit,
+                    textAlign: isMobile ? TextAlign.center : TextAlign.right,
+                    style: GoogleFonts.gaegu(
+                      fontSize: isMobile ? 15 : 15 * scale,
+                      fontWeight: FontWeight.w400,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
                   ),
-                  tooltip: soundEnabled ? l10n.soundOn : l10n.soundOff,
-                  onPressed: () => soundNotifier.toggle(),
-                ),
+                ],
               ),
             ),
           ),
