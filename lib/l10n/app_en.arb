@@ -85,7 +85,7 @@
   "tutorialPanel1Title": "Equalize",
   "tutorialPanel1Desc": "Turn the plate numbers into a correct equation to destroy the car!",
   "tutorialPanel2Title": "Drag the operators",
-  "tutorialPanel2Desc": "Drag math symbols between the numbers to change the formula.",
+  "tutorialPanel2Desc": "Drag math symbols between the numbers to change the formula. There must be one operator between each digit.",
   "tutorialPanel3Title": "Gotta go fast!",
   "tutorialPanel3Desc": "Solve it fast before the car hits Weber!",
   "tutorialPanel4Title": "Blast'em all!",
