@@ -18,7 +18,7 @@ class AudioService {
   Timer? _rateAnimationTimer;
 
   static const String explosionAsset = 'snd_badexplosion.wav';
-  static const String bgmAsset = 'vs_susie.ogg';
+  static const String bgmAsset = 'vs_susie.mp3';
 
   AudioService() {
     _init();

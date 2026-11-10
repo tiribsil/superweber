@@ -91,7 +91,7 @@ flutter:
     - assets/weber_sombra.png
     - assets/borboletas.png
     - assets/snd_badexplosion.wav
-    - assets/vs_susie.ogg
+    - assets/vs_susie.mp3
 
   fonts:
     - family: SocialIcons
