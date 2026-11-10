@@ -46,7 +46,7 @@ class SuperWeberApp extends ConsumerWidget {
     final router = ref.watch(appRouterProvider);
 
     return MaterialApp.router(
-      title: 'SuperWeber',
+      title: 'Weber vs Mundo',
       debugShowCheckedModeBanner: false,
       theme: themeNotifier.lightTheme,
       darkTheme: themeNotifier.darkTheme,
