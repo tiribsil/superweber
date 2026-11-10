@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../core/audio/sound_controller.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/theme/theme_provider.dart';
 
@@ -21,6 +22,8 @@ class LoginScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final themeState = ref.watch(themeProvider);
+    final soundEnabled = ref.watch(soundControllerProvider);
+    final soundNotifier = ref.read(soundControllerProvider.notifier);
     final l10n = AppLocalizations.of(context)!;
     final screenSize = MediaQuery.sizeOf(context);
     
@@ -140,7 +143,7 @@ class LoginScreen extends ConsumerWidget {
                           l10n,
                         ),
                       ),
-                      SizedBox(height: isMobile ? 18 : 40 * scale),
+                      SizedBox(height: isMobile ? 14 : 24 * scale),
 
                       // Language Button
                       _CuteMenuButton(
@@ -159,6 +162,21 @@ class LoginScreen extends ConsumerWidget {
                           themeState.locale.languageCode,
                           l10n,
                         ),
+                      ),
+                      SizedBox(height: isMobile ? 14 : 24 * scale),
+
+                      // Sound Button
+                      _CuteMenuButton(
+                        scale: scale,
+                        icon: soundEnabled
+                            ? Icons.volume_up_rounded
+                            : Icons.volume_off_rounded,
+                        title: l10n.sound,
+                        backgroundColor:
+                            const Color.fromARGB(255, 255, 146, 209),
+                        foregroundColor: Colors.white,
+                        valueBadge: soundEnabled ? l10n.soundOn : l10n.soundOff,
+                        onPressed: () => soundNotifier.toggle(),
                       ),
                     ],
                   ),
@@ -182,6 +200,32 @@ class LoginScreen extends ConsumerWidget {
                   fontSize: isMobile ? 18 : 18 * scale,
                   fontWeight: FontWeight.w400,
                   color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ),
+          ),
+
+          // 6. Top-Right Quick Sound Toggle
+          Positioned(
+            top: isMobile ? 16 : 28 * scale,
+            right: isMobile ? 16 : 28 * scale,
+            child: SafeArea(
+              child: Material(
+                color: Colors.transparent,
+                child: IconButton.filled(
+                  style: IconButton.styleFrom(
+                    backgroundColor: const Color.fromARGB(255, 255, 146, 209),
+                    foregroundColor: Colors.white,
+                    elevation: 4,
+                  ),
+                  icon: Icon(
+                    soundEnabled
+                        ? Icons.volume_up_rounded
+                        : Icons.volume_off_rounded,
+                    size: isMobile ? 24 : 28 * scale,
+                  ),
+                  tooltip: soundEnabled ? l10n.soundOn : l10n.soundOff,
+                  onPressed: () => soundNotifier.toggle(),
                 ),
               ),
             ),

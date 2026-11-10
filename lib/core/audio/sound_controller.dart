@@ -5,8 +5,10 @@ class SoundController extends Notifier<bool> {
   @override
   bool build() {
     final prefs = ref.watch(sharedPreferencesProvider);
-    // Sound starts disabled by default as required by usability specification
-    return prefs?.getBool('sound_enabled') ?? false;
+    // Sound is always set to off on page open/reload to comply with browser autoplay policies
+    // and ensure sound works cleanly without requiring manual toggle off/on cycles.
+    prefs?.setBool('sound_enabled', false);
+    return false;
   }
 
   void toggle() {
