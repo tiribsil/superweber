@@ -104,6 +104,7 @@ class GameController extends Notifier<GameState> {
       timeRemaining: GameState.defaultCarDuration,
       totalTime: GameState.defaultCarDuration,
       isExploding: false,
+      isMindDimmed: false,
       clearError: true,
       evaluation: MathEvaluator.evaluate(
         slots: freshSlots,
@@ -240,17 +241,22 @@ class GameController extends Notifier<GameState> {
     final updatedSolved = Set<String>.from(state.solvedPlates)
       ..add(solvedPlate);
 
+    _saveSolvedPlateToCloud(solvedPlate);
+
     state = state.copyWith(
-      score: state.score + 1,
-      isExploding: true,
+      isMindDimmed: true,
       solvedPlates: updatedSolved,
     );
 
-    _saveSolvedPlateToCloud(solvedPlate);
+    Timer(const Duration(seconds: 1), () {
+      state = state.copyWith(
+        score: state.score + 1,
+        isExploding: true,
+      );
 
-    // Car explosion animation delay before spawning next car
-    Timer(const Duration(milliseconds: 900), () {
-      _spawnNextCar();
+      Timer(const Duration(milliseconds: 1100), () {
+        _spawnNextCar();
+      });
     });
   }
 

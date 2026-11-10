@@ -119,8 +119,17 @@ class _StreetViewState extends ConsumerState<StreetView>
         _currentPlate = next.plateString;
         _carController.duration = _carDuration(next.totalTime);
         _carController.forward(from: 0);
-      } else if (next.isExploding && !(previous?.isExploding ?? false)) {
+
+        // Resume animations for the next car
+        if (!_animController.isAnimating) _animController.repeat();
+        if (!_roadController.isAnimating) _roadController.repeat();
+      } else if (next.isMindDimmed && !(previous?.isMindDimmed ?? false)) {
+        // Freeze all animations
         _carController.stop();
+        _animController.stop();
+        _roadController.stop();
+
+        const AssetImage(explosionSpriteAsset).evict();
       }
     });
 

@@ -404,223 +404,230 @@ class _MindViewState extends ConsumerState<MindView> {
 
         return Container(
           color: isDark ? theme.colorScheme.surface : const Color.fromARGB(255, 156, 170, 250),
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              // 1. Sombra do Weber (Fundo: preenche a altura sem esticar horizontalmente)
-              Positioned.fill(
-                child: Image.asset(
-                  weberSombraAsset,
-                  fit: BoxFit.fitHeight,
+            child: IgnorePointer(
+              ignoring: gameState.isMindDimmed,
+              child: AnimatedOpacity(
+                duration: const Duration(milliseconds: 300),
+                opacity: gameState.isMindDimmed ? 0.35 : 1.0,
+                child: Stack(
                   alignment: Alignment.center,
-                ),
-              ),
-
-              // Keep the brain and plate behind the foreground formula and controls.
-              _buildBrainWithPlate(
-                context,
-                gameState,
-                gameNotifier,
-                l10n,
-                maxHeight,
-                maxWidth,
-                chipSize,
-              ),
-
-              // Active Brain Interactive Content Area
-              SafeArea(
-                child: Column(
                   children: [
-                    // Top control bar: Hearts under Weber on the left & Skip / Surrender buttons on the right
-                    Padding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: horizontalInset,
-                        vertical: 8.0 * scale,
+                    // 1. Sombra do Weber (Fundo: preenche a altura sem esticar horizontalmente)
+                    Positioned.fill(
+                      child: Image.asset(
+                        weberSombraAsset,
+                        fit: BoxFit.fitHeight,
+                        alignment: Alignment.center,
                       ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          // Lives and score are grouped at the top-left of Weber's mind.
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Container(
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: maxWidth < 380 ? 4 : 8,
-                                  vertical: 4,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: theme.colorScheme.surfaceContainerHigh
-                                      .withValues(alpha: 0.6),
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(
-                                    color: theme.colorScheme.outline.withValues(
-                                      alpha: 0.2,
-                                    ),
-                                  ),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: List.generate(3, (index) {
-                                    final isAlive = index < gameState.hp;
-                                    return Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 1.0,
-                                      ),
-                                      child: Icon(
-                                        isAlive
-                                            ? Icons.favorite
-                                            : Icons.favorite_border,
-                                        color: isAlive
-                                            ? Colors.redAccent
-                                            : theme.colorScheme.outline
-                                                  .withValues(alpha: 0.4),
-                                        size: (maxWidth * 0.035)
-                                            .clamp(12.0, 16.0)
-                                            .toDouble(),
-                                      ),
-                                    );
-                                  }),
-                                ),
-                              ),
-                              const SizedBox(height: 6),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 4,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.black54,
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(
-                                    color: Colors.amberAccent,
-                                    width: 1,
-                                  ),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    const Text(
-                                      '🚗💥',
-                                      style: TextStyle(fontSize: 16),
-                                    ),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      '${gameState.score}',
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 13,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
+                    ),
 
-                          // Actions: Skip plate (mandatory per spec rule 67) & Surrender (adjustment 9)
-                          if (compactActions)
-                            Row(
+                    // Keep the brain and plate behind the foreground formula and controls.
+                    _buildBrainWithPlate(
+                      context,
+                      gameState,
+                      gameNotifier,
+                      l10n,
+                      maxHeight,
+                      maxWidth,
+                      chipSize,
+                    ),
+
+                    // Active Brain Interactive Content Area
+                    SafeArea(
+                      child: Column(
+                        children: [
+                      // Top control bar: Hearts under Weber on the left & Skip / Surrender buttons on the right
+                      Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: horizontalInset,
+                          vertical: 8.0 * scale,
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            // Lives and score are grouped at the top-left of Weber's mind.
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                IconButton.filledTonal(
-                                  tooltip: l10n.skip,
-                                  icon: const Icon(Icons.skip_next),
-                                  onPressed: () => gameNotifier.skipPlate(),
-                                ),
-                                IconButton.filledTonal(
-                                  tooltip: l10n.surrender,
-                                  style: IconButton.styleFrom(
-                                    foregroundColor: theme.colorScheme.error,
+                                Container(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: maxWidth < 380 ? 4 : 8,
+                                    vertical: 4,
                                   ),
-                                  icon: const Icon(Icons.flag_outlined),
-                                  onPressed: () => gameNotifier.surrender(),
-                                ),
-                              ],
-                            )
-                          else
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                FilledButton.tonalIcon(
-                                  icon: const Icon(Icons.skip_next, size: 18),
-                                  label: Text(l10n.skip),
-                                  onPressed: () => gameNotifier.skipPlate(),
-                                ),
-                                const SizedBox(width: 8),
-                                FilledButton.tonalIcon(
-                                  style: FilledButton.styleFrom(
-                                    foregroundColor: theme.colorScheme.error,
+                                  decoration: BoxDecoration(
+                                    color: theme.colorScheme.surfaceContainerHigh
+                                        .withValues(alpha: 0.6),
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                      color: theme.colorScheme.outline.withValues(
+                                        alpha: 0.2,
+                                      ),
+                                    ),
                                   ),
-                                  icon: const Icon(
-                                    Icons.flag_outlined,
-                                    size: 18,
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: List.generate(3, (index) {
+                                      final isAlive = index < gameState.hp;
+                                      return Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 1.0,
+                                        ),
+                                        child: Icon(
+                                          isAlive
+                                              ? Icons.favorite
+                                              : Icons.favorite_border,
+                                          color: isAlive
+                                              ? Colors.redAccent
+                                              : theme.colorScheme.outline
+                                                    .withValues(alpha: 0.4),
+                                          size: (maxWidth * 0.035)
+                                              .clamp(12.0, 16.0)
+                                              .toDouble(),
+                                        ),
+                                      );
+                                    }),
                                   ),
-                                  label: Text(l10n.surrender),
-                                  onPressed: () => gameNotifier.surrender(),
+                                ),
+                                const SizedBox(height: 6),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.black54,
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                      color: Colors.amberAccent,
+                                      width: 1,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Text(
+                                        '🚗💥',
+                                        style: TextStyle(fontSize: 16),
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        '${gameState.score}',
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 13,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ],
                             ),
-                        ],
-                      ),
-                    ),
 
-                    // Error / Status banner
-                    if (gameState.lastError != null)
-                      Container(
-                        margin: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 4,
+                            // Actions: Skip plate (mandatory per spec rule 67) & Surrender (adjustment 9)
+                            if (compactActions)
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  IconButton.filledTonal(
+                                    tooltip: l10n.skip,
+                                    icon: const Icon(Icons.skip_next),
+                                    onPressed: () => gameNotifier.skipPlate(),
+                                  ),
+                                  IconButton.filledTonal(
+                                    tooltip: l10n.surrender,
+                                    style: IconButton.styleFrom(
+                                      foregroundColor: theme.colorScheme.error,
+                                    ),
+                                    icon: const Icon(Icons.flag_outlined),
+                                    onPressed: () => gameNotifier.surrender(),
+                                  ),
+                                ],
+                              )
+                            else
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  FilledButton.tonalIcon(
+                                    icon: const Icon(Icons.skip_next, size: 18),
+                                    label: Text(l10n.skip),
+                                    onPressed: () => gameNotifier.skipPlate(),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  FilledButton.tonalIcon(
+                                    style: FilledButton.styleFrom(
+                                      foregroundColor: theme.colorScheme.error,
+                                    ),
+                                    icon: const Icon(
+                                      Icons.flag_outlined,
+                                      size: 18,
+                                    ),
+                                    label: Text(l10n.surrender),
+                                    onPressed: () => gameNotifier.surrender(),
+                                  ),
+                                ],
+                              ),
+                          ],
                         ),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 6,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.redAccent.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: Colors.redAccent),
-                        ),
-                        child: Text(
-                          _localizedGameError(l10n, gameState.lastError!),
-                          style: const TextStyle(
-                            color: Colors.redAccent,
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
+                      ),
+
+                      // Error / Status banner
+                      if (gameState.lastError != null)
+                        Container(
+                          margin: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 4,
                           ),
-                          textAlign: TextAlign.center,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.redAccent.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: Colors.redAccent),
+                          ),
+                          child: Text(
+                            _localizedGameError(l10n, gameState.lastError!),
+                            style: const TextStyle(
+                              color: Colors.redAccent,
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
                         ),
+
+                      const Spacer(),
+
+                      // LaTeX Formula Display
+                      _buildLatexDisplay(
+                        context,
+                        gameState,
+                        maxWidth,
+                        heightScale,
                       ),
 
-                    const Spacer(),
+                      SizedBox(height: 4 * heightScale),
 
-                    // LaTeX Formula Display
-                    _buildLatexDisplay(
-                      context,
-                      gameState,
-                      maxWidth,
-                      heightScale,
-                    ),
-
-                    SizedBox(height: 4 * heightScale),
-
-                    // Draggable operators palette tray
-                    _buildOperatorsArea(
-                      context,
-                      gameState,
-                      maxWidth,
-                      heightScale,
-                      chipSize,
-                    ),
-                    SizedBox(height: 8 * heightScale),
-                  ],
+                      // Draggable operators palette tray
+                      _buildOperatorsArea(
+                        context,
+                        gameState,
+                        maxWidth,
+                        heightScale,
+                        chipSize,
+                      ),
+                      SizedBox(height: 8 * heightScale),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        );
+        ),
+      );
       },
     );
   }

@@ -12,6 +12,7 @@ class GameState {
   final double totalTime;
   final bool isGameOver;
   final bool isExploding;
+  final bool isMindDimmed;
   final EvaluationResult evaluation;
   final Set<String> solvedPlates;
   final String? lastError;
@@ -26,6 +27,7 @@ class GameState {
     required this.totalTime,
     required this.isGameOver,
     required this.isExploding,
+    required this.isMindDimmed,
     required this.evaluation,
     required this.solvedPlates,
     this.lastError,
@@ -54,6 +56,7 @@ class GameState {
       totalTime: defaultCarDuration,
       isGameOver: false,
       isExploding: false,
+      isMindDimmed: false,
       evaluation: MathEvaluator.evaluate(
         slots: initialSlots,
         digits: initialDigits,
@@ -81,6 +84,7 @@ class GameState {
     double? totalTime,
     bool? isGameOver,
     bool? isExploding,
+    bool? isMindDimmed,
     EvaluationResult? evaluation,
     Set<String>? solvedPlates,
     String? lastError,
@@ -96,6 +100,7 @@ class GameState {
       totalTime: totalTime ?? this.totalTime,
       isGameOver: isGameOver ?? this.isGameOver,
       isExploding: isExploding ?? this.isExploding,
+      isMindDimmed: isMindDimmed ?? this.isMindDimmed,
       evaluation: evaluation ?? this.evaluation,
       solvedPlates: solvedPlates ?? this.solvedPlates,
       lastError: clearError ? null : (lastError ?? this.lastError),
