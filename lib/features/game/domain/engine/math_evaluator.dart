@@ -90,44 +90,52 @@ class MathEvaluator {
       );
     }
 
-    if (equalsIndices.length > 1) {
-      return EvaluationResult(
-        isValid: false,
-        isSolved: false,
-        errorMessage: 'multiple_equals',
-        latex: latex,
-      );
+    // Split tokens by OperatorToken.equals into segments
+    final segments = <List<dynamic>>[];
+    int lastIdx = 0;
+    for (final eqIdx in equalsIndices) {
+      segments.add(tokens.sublist(lastIdx, eqIdx));
+      lastIdx = eqIdx + 1;
     }
+    segments.add(tokens.sublist(lastIdx));
 
-    final eqIndex = equalsIndices.first;
-    final lhsTokens = tokens.sublist(0, eqIndex);
-    final rhsTokens = tokens.sublist(eqIndex + 1);
-
-    if (lhsTokens.isEmpty || rhsTokens.isEmpty) {
-      return EvaluationResult(
-        isValid: false,
-        isSolved: false,
-        errorMessage: 'both_sides_required',
-        latex: latex,
-      );
+    // Every segment must be non-empty (cannot have leading '=', trailing '=', or consecutive '==')
+    for (final seg in segments) {
+      if (seg.isEmpty) {
+        return EvaluationResult(
+          isValid: false,
+          isSolved: false,
+          errorMessage: 'both_sides_required',
+          latex: latex,
+        );
+      }
     }
 
     try {
-      final lhsVal = _Parser(
-        lhsTokens,
-        allowFractionalDivision,
-      ).parseExpression();
-      final rhsVal = _Parser(
-        rhsTokens,
-        allowFractionalDivision,
-      ).parseExpression();
+      final segmentValues = <double>[];
+      for (final seg in segments) {
+        final val = _Parser(
+          seg,
+          allowFractionalDivision,
+        ).parseExpression();
+        segmentValues.add(val);
+      }
 
-      final solved = (lhsVal - rhsVal).abs() < epsilon;
+      // Equation is solved if all segments evaluate to the same value
+      bool solved = true;
+      final firstVal = segmentValues.first;
+      for (int i = 1; i < segmentValues.length; i++) {
+        if ((firstVal - segmentValues[i]).abs() >= epsilon) {
+          solved = false;
+          break;
+        }
+      }
+
       return EvaluationResult(
         isValid: true,
         isSolved: solved,
-        lhsValue: lhsVal,
-        rhsValue: rhsVal,
+        lhsValue: segmentValues.first,
+        rhsValue: segmentValues.last,
         errorMessage: solved ? null : 'unequal_sides',
         latex: latex,
       );
@@ -168,20 +176,22 @@ class MathEvaluator {
       tokens.addAll(slots[4]);
 
       // Split by '=' if present and evaluate parts if syntactically complete
-      final eqIndex = tokens.indexOf(OperatorToken.equals);
-      if (eqIndex != -1) {
-        final lhs = tokens.sublist(0, eqIndex);
-        final rhs = tokens.sublist(eqIndex + 1);
-        if (lhs.isNotEmpty) {
-          try {
-            _Parser(lhs, allowFractionalDivision).parseExpression();
-          } on MathException catch (e) {
-            if (e.code == 'overflow' || e.code == 'div_zero') return false;
-          } catch (_) {}
+      final segments = <List<dynamic>>[];
+      var currentSegment = <dynamic>[];
+      for (final t in tokens) {
+        if (t == OperatorToken.equals) {
+          segments.add(currentSegment);
+          currentSegment = <dynamic>[];
+        } else {
+          currentSegment.add(t);
         }
-        if (rhs.isNotEmpty) {
+      }
+      segments.add(currentSegment);
+
+      for (final seg in segments) {
+        if (seg.isNotEmpty) {
           try {
-            _Parser(rhs, allowFractionalDivision).parseExpression();
+            _Parser(seg, allowFractionalDivision).parseExpression();
           } on MathException catch (e) {
             if (e.code == 'overflow' || e.code == 'div_zero') return false;
           } catch (_) {}

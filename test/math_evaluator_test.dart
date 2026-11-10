@@ -208,5 +208,70 @@ void main() {
       final closeCount = '}'.allMatches(latex).length;
       expect(openCount, equals(closeCount));
     });
+
+    test('Chained equality with two equal signs: 1 + 1 = 2 = 2', () {
+      final slots = [
+        <OperatorToken>[], // before 1
+        [OperatorToken.plus], // 1 + 1
+        [OperatorToken.equals], // 1 = 2
+        [OperatorToken.equals], // 2 = 2
+        <OperatorToken>[], // after 2
+      ];
+      final digits = [1, 1, 2, 2];
+
+      final result = MathEvaluator.evaluate(
+        slots: slots,
+        digits: digits,
+        allowFractionalDivision: false,
+      );
+
+      expect(result.isValid, isTrue);
+      expect(result.isSolved, isTrue);
+      expect(result.lhsValue, equals(2.0));
+      expect(result.rhsValue, equals(2.0));
+    });
+
+    test('Chained equality with three equal signs: 5 = 5 = 5 = 5', () {
+      final slots = [
+        <OperatorToken>[],
+        [OperatorToken.equals],
+        [OperatorToken.equals],
+        [OperatorToken.equals],
+        <OperatorToken>[],
+      ];
+      final digits = [5, 5, 5, 5];
+
+      final result = MathEvaluator.evaluate(
+        slots: slots,
+        digits: digits,
+        allowFractionalDivision: false,
+      );
+
+      expect(result.isValid, isTrue);
+      expect(result.isSolved, isTrue);
+      expect(result.lhsValue, equals(5.0));
+      expect(result.rhsValue, equals(5.0));
+    });
+
+    test('Chained equality with unequal sides fails: 1 + 1 = 2 = 5 - 1', () {
+      final slots = [
+        <OperatorToken>[],
+        [OperatorToken.plus],
+        [OperatorToken.equals],
+        [OperatorToken.equals, OperatorToken.minus],
+        <OperatorToken>[],
+      ];
+      final digits = [1, 1, 2, 1]; // 1 + 1 = 2 = 2 - 1 -> 2 = 2 = 1 (unequal)
+
+      final result = MathEvaluator.evaluate(
+        slots: slots,
+        digits: digits,
+        allowFractionalDivision: false,
+      );
+
+      expect(result.isValid, isTrue);
+      expect(result.isSolved, isFalse);
+      expect(result.errorMessage, equals('unequal_sides'));
+    });
   });
 }
