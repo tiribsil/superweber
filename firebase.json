@@ -26,6 +26,25 @@
         "source": "**",
         "destination": "/index.html"
       }
+    ],
+    "headers": [
+      {
+        "source": "**/*.@(ogg|mp3|wav)",
+        "headers": [
+          {
+            "key": "Content-Type",
+            "value": "audio/ogg"
+          },
+          {
+            "key": "Accept-Ranges",
+            "value": "bytes"
+          },
+          {
+            "key": "Cache-Control",
+            "value": "no-transform"
+          }
+        ]
+      }
     ]
   }
 }
