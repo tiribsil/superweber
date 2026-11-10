@@ -1,17 +1,31 @@
 {
-	"flutter": {
-		"platforms": {
-			"dart": {
-				"lib/firebase_options.dart": {
-					"projectId": "superweber-9a398",
-					"configurations": {
-						"web": "1:744416865405:web:38f256ecfe8718a44ed514"
-					}
-				}
-			}
-		}
-	},
-	"firestore": {
-		"rules": "firestore.rules"
-	}
+  "flutter": {
+    "platforms": {
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "superweber-9a398",
+          "configurations": {
+            "web": "1:744416865405:web:38f256ecfe8718a44ed514"
+          }
+        }
+      }
+    }
+  },
+  "firestore": {
+    "rules": "firestore.rules"
+  },
+  "hosting": {
+    "public": "build/web",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  }
 }
