@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/audio/audio_service.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../domain/models/difficulty_level.dart';
 import 'controllers/game_controller.dart';
@@ -16,6 +17,16 @@ class GameScreen extends ConsumerWidget {
     final gameNotifier = ref.read(gameControllerProvider.notifier);
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
+
+    ref.listen(gameControllerProvider, (previous, next) {
+      if (previous?.isMindDimmed != next.isMindDimmed ||
+          previous?.isGameOver != next.isGameOver) {
+        ref.read(audioServiceProvider).updateGameAudioState(
+          isMindDimmed: next.isMindDimmed,
+          isGameOver: next.isGameOver,
+        );
+      }
+    });
 
     return Scaffold(
       body: SafeArea(

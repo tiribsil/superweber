@@ -5,6 +5,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'core/audio/audio_service.dart';
 import 'core/localization/app_localizations.dart';
 import 'core/routing/app_router.dart';
 import 'core/theme/theme_provider.dart';
@@ -39,6 +40,7 @@ class SuperWeberApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(audioCoordinatorProvider);
     final themeState = ref.watch(themeProvider);
     final themeNotifier = ref.read(themeProvider.notifier);
     final router = ref.watch(appRouterProvider);

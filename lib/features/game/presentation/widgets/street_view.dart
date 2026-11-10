@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../controllers/game_controller.dart';
+import '../../../../core/audio/audio_service.dart';
+import '../../../../core/audio/sound_controller.dart';
 
 class _WeberHopTransform {
   final double dy;
@@ -110,6 +112,12 @@ class _StreetViewState extends ConsumerState<StreetView>
     final gameState = ref.watch(gameControllerProvider);
 
     ref.listen(gameControllerProvider, (previous, next) {
+      if (next.isExploding && !(previous?.isExploding ?? false)) {
+        if (ref.read(soundControllerProvider)) {
+          ref.read(audioServiceProvider).playExplosion();
+        }
+      }
+
       final isNewCar =
           next.plateString != _currentPlate ||
           (next.timeRemaining == next.totalTime &&

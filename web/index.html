@@ -33,6 +33,47 @@
   <link rel="manifest" href="manifest.json">
 
   <meta name="google-signin-client_id" content="744416865405-ivq2j65iqksmhhofe225r1smdnvg8c5h.apps.googleusercontent.com">
+
+  <script>
+    // Disable pitch preservation so that slowing down audio lowers its pitch smoothly
+    // and eliminates the robotic/choppy time-stretching artifacts in browsers.
+    (function() {
+      try {
+        const origPlay = HTMLMediaElement.prototype.play;
+        if (origPlay) {
+          HTMLMediaElement.prototype.play = function() {
+            try {
+              this.preservesPitch = false;
+              this.webkitPreservesPitch = false;
+              this.mozPreservesPitch = false;
+            } catch (_) {}
+            return origPlay.apply(this, arguments);
+          };
+        }
+
+        const desc = Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype, 'playbackRate');
+        if (desc && desc.set) {
+          Object.defineProperty(HTMLMediaElement.prototype, 'playbackRate', {
+            get() {
+              return desc.get.call(this);
+            },
+            set(val) {
+              try {
+                this.preservesPitch = false;
+                this.webkitPreservesPitch = false;
+                this.mozPreservesPitch = false;
+              } catch (_) {}
+              return desc.set.call(this, val);
+            },
+            configurable: true,
+            enumerable: true
+          });
+        }
+      } catch (e) {
+        console.warn('Could not hook playbackRate for pitch lowering:', e);
+      }
+    })();
+  </script>
 </head>
 <body>
   <!--

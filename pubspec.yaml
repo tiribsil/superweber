@@ -51,6 +51,7 @@ dependencies:
   intl: ^0.20.3
   google_fonts: ^9.0.0
   flutter_snake_navigationbar: ^0.6.1
+  audioplayers: ^6.8.1
 
 dev_dependencies:
   flutter_test:
@@ -89,6 +90,8 @@ flutter:
     - assets/weber_idle.png
     - assets/weber_sombra.png
     - assets/borboletas.png
+    - assets/snd_badexplosion.wav
+    - assets/vs_susie.ogg
 
   fonts:
     - family: SocialIcons
