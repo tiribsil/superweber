@@ -94,14 +94,14 @@ class GameController extends Notifier<GameState> {
     return plate.codeUnits.map((digit) => digit - 48).toList();
   }
 
-  void _spawnNextCar() {
+  void _spawnNextCar({double? customTimeRemaining}) {
     final nextDigits = _generateUnsolvedDigits();
     final freshSlots = List.generate(5, (_) => <OperatorToken>[]);
 
     state = state.copyWith(
       digits: nextDigits,
       slots: freshSlots,
-      timeRemaining: GameState.defaultCarDuration,
+      timeRemaining: customTimeRemaining ?? GameState.defaultCarDuration,
       totalTime: GameState.defaultCarDuration,
       isExploding: false,
       isMindDimmed: false,
@@ -113,6 +113,7 @@ class GameController extends Notifier<GameState> {
       ),
     );
   }
+
 
   /// Attempts to insert an operator into a given slot.
   /// If [insertIndex] is provided, inserts at that position; otherwise appends.
@@ -206,7 +207,14 @@ class GameController extends Notifier<GameState> {
 
   void skipPlate() {
     if (state.isGameOver || state.isExploding) return;
-    _spawnNextCar();
+
+    final threshold = state.totalTime * 0.25;
+
+    final newTime = state.timeRemaining > threshold
+        ? (state.timeRemaining / 2)
+        : state.timeRemaining;
+
+    _spawnNextCar(customTimeRemaining: newTime);
   }
 
   void surrender() {

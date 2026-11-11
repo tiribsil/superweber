@@ -49,10 +49,14 @@ class _StreetViewState extends ConsumerState<StreetView>
       duration: const Duration(milliseconds: 750),
     )..repeat();
 
+    final initialProgress = initialGameState.totalTime > 0
+        ? (1.0 - (initialGameState.timeRemaining / initialGameState.totalTime)).clamp(0.0, 1.0)
+        : 0.0;
+
     _carController = AnimationController(
       vsync: this,
-      duration: _carDuration(initialGameState.totalTime),
-    )..forward();
+      duration: _carDuration(initialGameState.totalTime.toDouble()),
+    )..forward(from: initialProgress);
 
     _roadController = AnimationController(
       vsync: this,
@@ -125,8 +129,13 @@ class _StreetViewState extends ConsumerState<StreetView>
           (previous?.isGameOver == true && !next.isGameOver);
       if (isNewCar) {
         _currentPlate = next.plateString;
-        _carController.duration = _carDuration(next.totalTime);
-        _carController.forward(from: 0);
+        _carController.duration = _carDuration(next.totalTime.toDouble());
+
+        final startProgress = next.totalTime > 0
+            ? (1.0 - (next.timeRemaining / next.totalTime)).clamp(0.0, 1.0)
+            : 0.0;
+
+        _carController.forward(from: startProgress);
 
         // Resume animations for the next car
         if (!_animController.isAnimating) _animController.repeat();
