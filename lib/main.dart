@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/services.dart';
 
 import 'core/audio/audio_service.dart';
 import 'core/localization/app_localizations.dart';
@@ -13,6 +14,12 @@ import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  AssetManifest.loadFromAssetBundle(rootBundle).then((manifest) {
+    for (final asset in manifest.listAssets()) {
+      rootBundle.load(asset);
+    }
+  });
 
   // Firebase is configured for the Web app registered in the Firebase project.
   try {
