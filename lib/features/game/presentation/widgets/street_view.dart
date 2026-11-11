@@ -127,7 +127,15 @@ class _StreetViewState extends ConsumerState<StreetView>
           (next.timeRemaining == next.totalTime &&
               previous?.timeRemaining != next.timeRemaining) ||
           (previous?.isGameOver == true && !next.isGameOver);
-      if (isNewCar) {
+      final wasSkippedWithoutPenalty =
+          previous != null &&
+          next.plateString != _currentPlate &&
+          next.timeRemaining == previous.timeRemaining &&
+          next.timeRemaining < next.totalTime;
+
+      if (wasSkippedWithoutPenalty) {
+        _currentPlate = next.plateString;
+      } else if (isNewCar) {
         _currentPlate = next.plateString;
         _carController.duration = _carDuration(next.totalTime.toDouble());
 
@@ -137,7 +145,6 @@ class _StreetViewState extends ConsumerState<StreetView>
 
         _carController.forward(from: startProgress);
 
-        // Resume animations for the next car
         if (!_animController.isAnimating) _animController.repeat();
         if (!_roadController.isAnimating) _roadController.repeat();
       } else if (next.isMindDimmed && !(previous?.isMindDimmed ?? false)) {

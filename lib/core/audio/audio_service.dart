@@ -27,6 +27,7 @@ class AudioService {
   void _init() {
     try {
       _bgmPlayer.setReleaseMode(ReleaseMode.loop);
+      _sfxPlayer.setSource(AssetSource(explosionAsset));
     } catch (e) {
       debugPrint('AudioService init error: $e');
     }
@@ -36,9 +37,10 @@ class AudioService {
     if (_isDisposed || !_soundEnabled) return;
     try {
       await _sfxPlayer.stop();
-      await _sfxPlayer.play(AssetSource(explosionAsset));
+      await _sfxPlayer.seek(Duration.zero);
+      await _sfxPlayer.resume();
     } catch (e) {
-      debugPrint('Error playing explosion SFX: $e');
+      await _sfxPlayer.play(AssetSource(explosionAsset));
     }
   }
 
