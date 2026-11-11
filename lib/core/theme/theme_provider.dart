@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ThemeState {
@@ -92,29 +93,40 @@ class ThemeNotifier extends Notifier<ThemeState> {
     }
   }
 
+  /// Returns a [TextTheme] styled with the selected Google Font and size scale.
+  TextTheme _buildTextTheme(TextTheme base) {
+    // Scale sizes first.
+    final scaled = base.apply(fontSizeFactor: state.fontSizeScale);
+    // Resolve the actual font-family name registered by google_fonts (e.g. "Lora").
+    // getFont() triggers font loading and returns a TextStyle whose .fontFamily
+    // is the internal family name we can pass to TextTheme.apply().
+    try {
+      final resolvedFamily = GoogleFonts.getFont(state.fontFamily).fontFamily;
+      if (resolvedFamily != null) {
+        return scaled.apply(fontFamily: resolvedFamily);
+      }
+    } catch (_) {
+      // Unknown font name — fall back to scaled base theme.
+    }
+    return scaled;
+  }
+
   ThemeData get lightTheme {
-    return ThemeData(
+    final base = ThemeData(
       useMaterial3: true,
       colorSchemeSeed: state.seedColor,
       brightness: Brightness.light,
-      fontFamily: state.fontFamily,
-      textTheme: _scaleTextTheme(ThemeData.light().textTheme),
     );
+    return base.copyWith(textTheme: _buildTextTheme(base.textTheme));
   }
 
   ThemeData get darkTheme {
-    return ThemeData(
+    final base = ThemeData(
       useMaterial3: true,
       colorSchemeSeed: state.seedColor,
       brightness: Brightness.dark,
-      fontFamily: state.fontFamily,
-      textTheme: _scaleTextTheme(ThemeData.dark().textTheme),
     );
-  }
-
-  TextTheme _scaleTextTheme(TextTheme base) {
-    final scale = state.fontSizeScale;
-    return base.apply(fontSizeFactor: scale, fontFamily: state.fontFamily);
+    return base.copyWith(textTheme: _buildTextTheme(base.textTheme));
   }
 }
 

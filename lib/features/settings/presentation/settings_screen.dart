@@ -24,10 +24,10 @@ class SettingsScreen extends ConsumerWidget {
 
   static const List<String> availableFonts = [
     'Roboto',
-    'Garamond',
-    'Helvetica',
-    'Courier',
-    'Arial',
+    'Lora',
+    'Oswald',
+    'Nunito',
+    'Source Code Pro',
   ];
 
   @override
