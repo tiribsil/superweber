@@ -37,10 +37,9 @@ class AudioService {
     if (_isDisposed || !_soundEnabled) return;
     try {
       await _sfxPlayer.stop();
-      await _sfxPlayer.seek(Duration.zero);
-      await _sfxPlayer.resume();
-    } catch (e) {
       await _sfxPlayer.play(AssetSource(explosionAsset));
+    } catch (e) {
+      debugPrint('Error playing explosion SFX: $e');
     }
   }
 
