@@ -17,7 +17,9 @@ void main() async {
 
   AssetManifest.loadFromAssetBundle(rootBundle).then((manifest) {
     for (final asset in manifest.listAssets()) {
-      rootBundle.load(asset);
+      if (asset.startsWith('assets/')) {
+        rootBundle.load(asset);
+      }
     }
   });
 
