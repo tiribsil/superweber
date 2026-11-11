@@ -7,6 +7,7 @@ import '../../../core/audio/sound_controller.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../game/presentation/controllers/game_controller.dart';
+import '../../../../core/audio/audio_service.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -276,6 +277,10 @@ class SettingsScreen extends ConsumerWidget {
                 onPressed: () async {
                   await FirebaseAuth.instance.signOut();
                   ref.invalidate(gameControllerProvider);
+                  ref.read(audioServiceProvider).updateGameAudioState(
+                    isMindDimmed: false,
+                    isGameOver: false,
+                  );
                   if (context.mounted) context.go('/login');
                 },
               ),
