@@ -47,7 +47,6 @@ class MathEvaluator {
       return EvaluationResult(
         isValid: false,
         isSolved: false,
-        errorMessage: 'invalid_structure',
         latex: latex,
       );
     }
@@ -56,7 +55,6 @@ class MathEvaluator {
       return EvaluationResult(
         isValid: false,
         isSolved: false,
-        errorMessage: 'need_operator',
         latex: latex,
       );
     }
@@ -85,7 +83,6 @@ class MathEvaluator {
       return EvaluationResult(
         isValid: false,
         isSolved: false,
-        errorMessage: 'need_equals',
         latex: latex,
       );
     }
@@ -105,7 +102,6 @@ class MathEvaluator {
         return EvaluationResult(
           isValid: false,
           isSolved: false,
-          errorMessage: 'both_sides_required',
           latex: latex,
         );
       }
@@ -136,7 +132,6 @@ class MathEvaluator {
         isSolved: solved,
         lhsValue: segmentValues.first,
         rhsValue: segmentValues.last,
-        errorMessage: solved ? null : 'unequal_sides',
         latex: latex,
       );
     } on MathException catch (e) {
@@ -150,7 +145,6 @@ class MathEvaluator {
       return EvaluationResult(
         isValid: false,
         isSolved: false,
-        errorMessage: 'invalid_expression',
         latex: latex,
       );
     }

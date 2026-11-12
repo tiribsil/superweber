@@ -982,19 +982,19 @@ class _MindViewState extends ConsumerState<MindView> {
               // ),
             ),
           ),
-          // if (state.evaluation.errorMessage != null &&
-          //     !state.evaluation.isSolved)
-          //   Padding(
-          //     padding: const EdgeInsets.only(top: 6.0),
-          //     child: Text(
-          //       state.evaluation.errorMessage!,
-          //       style: TextStyle(
-          //         fontSize: 11,
-          //         color: theme.colorScheme.error,
-          //         fontWeight: FontWeight.w600,
-          //       ),
-          //     ),
-          //   ),
+          if (state.evaluation.errorMessage != null &&
+              !state.evaluation.isSolved)
+            Padding(
+              padding: const EdgeInsets.only(top: 6.0),
+              child: Text(
+                state.evaluation.errorMessage!,
+                style: TextStyle(
+                  fontSize: 11,
+                  color: theme.colorScheme.error,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
         ],
       ),
     );
