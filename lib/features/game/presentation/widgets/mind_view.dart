@@ -604,6 +604,7 @@ class _MindViewState extends ConsumerState<MindView> {
                       // LaTeX Formula Display
                       _buildLatexDisplay(
                         context,
+                        l10n,
                         gameState,
                         maxWidth,
                         heightScale,
@@ -930,6 +931,7 @@ class _MindViewState extends ConsumerState<MindView> {
 
   Widget _buildLatexDisplay(
     BuildContext context,
+    AppLocalizations l10n,
     GameState state,
     double maxWidth,
     double heightScale,
@@ -987,7 +989,7 @@ class _MindViewState extends ConsumerState<MindView> {
             Padding(
               padding: const EdgeInsets.only(top: 6.0),
               child: Text(
-                state.evaluation.errorMessage!,
+                _localizedGameError(l10n, state.evaluation.errorMessage!),
                 style: TextStyle(
                   fontSize: 11,
                   color: theme.colorScheme.error,
