@@ -70,6 +70,16 @@ class SuperWeberApp extends ConsumerWidget {
       ],
       supportedLocales: AppLocalizations.supportedLocales,
       routerConfig: router,
+      // Inject font-size scale via MediaQuery so every Text widget respects it.
+      builder: (context, child) {
+        final mq = MediaQuery.of(context);
+        return MediaQuery(
+          data: mq.copyWith(
+            textScaler: TextScaler.linear(themeState.fontSizeScale),
+          ),
+          child: child!,
+        );
+      },
     );
   }
 }

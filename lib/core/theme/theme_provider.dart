@@ -93,22 +93,18 @@ class ThemeNotifier extends Notifier<ThemeState> {
     }
   }
 
-  /// Returns a [TextTheme] styled with the selected Google Font and size scale.
+  /// Returns a [TextTheme] styled with the selected Google Font.
+  /// Font size scaling is handled separately via [MediaQuery.textScaler] in main.dart.
   TextTheme _buildTextTheme(TextTheme base) {
-    // Scale sizes first.
-    final scaled = base.apply(fontSizeFactor: state.fontSizeScale);
-    // Resolve the actual font-family name registered by google_fonts (e.g. "Lora").
-    // getFont() triggers font loading and returns a TextStyle whose .fontFamily
-    // is the internal family name we can pass to TextTheme.apply().
     try {
       final resolvedFamily = GoogleFonts.getFont(state.fontFamily).fontFamily;
       if (resolvedFamily != null) {
-        return scaled.apply(fontFamily: resolvedFamily);
+        return base.apply(fontFamily: resolvedFamily);
       }
     } catch (_) {
-      // Unknown font name — fall back to scaled base theme.
+      // Unknown font name — fall back to base theme.
     }
-    return scaled;
+    return base;
   }
 
   ThemeData get lightTheme {
