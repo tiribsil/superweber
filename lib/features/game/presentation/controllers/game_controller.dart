@@ -17,19 +17,7 @@ class GameController extends Notifier<GameState> {
   @override
   GameState build() {
     _isDisposed = false;
-    final initialState = GameState.initial();
-    final initialDigits = List.generate(4, (_) => _random.nextInt(10));
-    final initialSlots = List.generate(5, (_) => <OperatorToken>[]);
-    final initialGameState = initialState.copyWith(
-      digits: initialDigits,
-      slots: initialSlots,
-      evaluation: MathEvaluator.evaluate(
-        slots: initialSlots,
-        digits: initialDigits,
-        allowFractionalDivision:
-            initialState.difficulty.allowFractionalDivision,
-      ),
-    );
+    final initialGameState = GameState.initial();
 
     _startTimer();
     unawaited(_loadSolvedPlates());

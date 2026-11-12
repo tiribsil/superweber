@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'difficulty_level.dart';
 import 'operator_token.dart';
 import '../engine/math_evaluator.dart';
@@ -37,7 +39,8 @@ class GameState {
   static const double defaultCarDuration = 100.0;
 
   factory GameState.initial({DifficultyLevel difficulty = DifficultyLevel.easy}) {
-    final initialDigits = [1, 1, 1, 1];
+    final rng = math.Random();
+    final initialDigits = List.generate(4, (_) => rng.nextInt(10));
     final initialSlots = [
       <OperatorToken>[],
       <OperatorToken>[],
